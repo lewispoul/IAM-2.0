@@ -1,0 +1,13 @@
+[project]
+name = "iam2"
+version = "0.0.1"
+description = "IAM 2.0 – Intelligent Agent for Molecules (clean, modular rebuild)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name="Louis-Philippe Poulin"}]
+
+[project.optional-dependencies]
+dev = ["ruff", "mypy", "pytest", "httpx", "pydantic>=2,<3"]
+
+[tool.ruff]
+line-length = 100
