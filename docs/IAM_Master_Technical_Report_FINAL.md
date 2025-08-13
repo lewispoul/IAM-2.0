@@ -92,7 +92,7 @@ flowchart LR
   end
 
   subgraph IO[IO & Schema]
-    I1[Schema (Pydantic)]
+    I1["Schema (Pydantic)"]
     I2[Results Writer]
     I3[File Utils]
   end
@@ -100,7 +100,7 @@ flowchart LR
   subgraph ENG[Engines]
     E1[XTB]
     E2[Psi4]
-    E3[Gaussian (Stub)]
+    E3["Gaussian (Stub)"]
   end
 
   subgraph PIPE[Pipelines]
