@@ -1,5 +1,6 @@
 # IAM 2.0 — Intelligent Agent for Molecules
 ![IAM UI](docs/images/IAM-2.0UI.png)
+
 ![IAM at a Glance](docs/images/iam_at_a_glance.png)
 
 **Model. Simulate. Predict. Visualize.**  
