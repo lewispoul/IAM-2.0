@@ -85,7 +85,7 @@ IAM 2.0 is a **clean, modular rebuild** of the Intelligent Agent for Molecules â
 IAM 2.0 consists of an **API layer**, **engines**, **pipelines**, **predictors**, **IO**, **UI**, and **DevOps tooling**. All outputs conform to a **unified results schema** with explicit units an[...]  
 
 ### 2.1 Module Dependency Map (Mermaid)
-```
+```mermaid
 flowchart LR
 
   subgraph API[API Layer]
