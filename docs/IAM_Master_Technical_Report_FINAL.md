@@ -61,7 +61,7 @@ pytest -q
 
 ## 1. Executive Summary
 
-IAM 2.0 is a **clean, modular rebuild** of the Intelligent Agent for Molecules — a platform to **simulate, predict, and visualize** molecular properties with a focus on energetic materials, while remaining extensible to broader chemistry domains. The 2.0 architecture is **schema-first**, **engine-agnostic**, and **UI-friendly**, enabling local (e.g., Raspberry Pi) and HPC workflows with the same API.
+IAM 2.0 is a **clean, modular rebuild** of the Intelligent Agent for Molecules — a platform to **simulate, predict, and visualize** molecular properties with a focus on energetic materials, whil[...]  
 
 ### 1.1 At a Glance
 | Capability | Module | Purpose | Status | Notes |
@@ -82,11 +82,12 @@ IAM 2.0 is a **clean, modular rebuild** of the Intelligent Agent for Molecules �
 
 ## 2. System Overview
 
-IAM 2.0 consists of an **API layer**, **engines**, **pipelines**, **predictors**, **IO**, **UI**, and **DevOps tooling**. All outputs conform to a **unified results schema** with explicit units and artifact paths.
+IAM 2.0 consists of an **API layer**, **engines**, **pipelines**, **predictors**, **IO**, **UI**, and **DevOps tooling**. All outputs conform to a **unified results schema** with explicit units an[...]  
 
 ### 2.1 Module Dependency Map (Mermaid)
-```mermaid
+```
 flowchart LR
+
   subgraph API[API Layer]
     A1[/FastAPI/]
   end
@@ -132,17 +133,6 @@ flowchart LR
   I2 --> U1
   A1 --> U1
   U2 --> A1
-
-  classDef api fill:#FFF3B0,stroke:#E0B600,stroke-width:1px;
-  classDef eng fill:#C2F970,stroke:#3D9B00,stroke-width:1px;
-  classDef pred fill:#FFC78E,stroke:#C56700,stroke-width:1px;
-  classDef io fill:#D0B3FF,stroke:#6C2CF1,stroke-width:1px;
-  classDef ui fill:#BDE0FE,stroke:#2776C9,stroke-width:1px;
-  class A1 api;
-  class E1,E2,E3 eng;
-  class R1,R2,R3 pred;
-  class I1,I2,I3 io;
-  class U1,U2 ui;
 ```
 
 > **Developer Note:** Keep Mermaid code in the doc. Add a rendered PNG at `docs/images/module_map.png` for static viewing:
@@ -335,7 +325,7 @@ flowchart LR
 
 **curl**
 ```bash
-curl -X POST http://localhost:8000/api/v1/run_xtb  -H "Content-Type: application/json"  -d '{"input_type":"smiles","input_data":"CCO","charge":0,"multiplicity":1,"gfn":2,"options":{"opt":true,"property":true}}'
+curl -X POST http://localhost:8000/api/v1/run_xtb  -H "Content-Type: application/json"  -d '{"input_type":"smiles","input_data":"CCO","charge":0,"multiplicity":1,"gfn":2,"options":{"opt":true,"pr[...]  
 ```
 
 ### 4.2 `POST /api/v1/run_psi4` — `[API: PSI4RUN]`
