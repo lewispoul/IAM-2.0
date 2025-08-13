@@ -1,10 +1,14 @@
-# IAM 2.0
+# IAM 2.0 — Intelligent Agent for Molecules
 
-Clean, modular rebuild of the Intelligent Agent for Molecules.
+![IAM at a Glance](docs/images/iam_at_a_glance.png)
 
-- **Docs:** see `docs/IAM_Master_Technical_Report_FINAL.md` (to be added)
-- **API:** FastAPI in `api/`
-- **Package:** `src/iam/`
-- **CI:** GitHub Actions (ruff, mypy, pytest)
+**Model. Simulate. Predict. Visualize.**  
+A clean, modular platform for computational chemistry with a focus on energetic materials — built for local devices and HPC.
 
-Created: 2025-08-13
+- ⚙️ Engines: XTB (local), Psi4 (local), Gaussian-ready (HPC)
+- 📈 Predictors: Kamlet–Jacobs, Keshavarz, ML (VoD/Pcj/ΔHdet)
+- 🧪 Pipelines: SMILES→XYZ→Optimization→Properties→Prediction
+- 🖥️ UI: Molecule viewer, Orbitals, Spectra, Performance
+- 🧰 Dev: FastAPI, Pydantic, RDKit, 3Dmol.js, GitHub Actions
+
+📘 Read the full whitepaper: **[`/docs/IAM_2.0_Whitepaper.md`](docs/IAM_2.0_Whitepaper.md)**
