@@ -87,21 +87,39 @@ IAM 2.0 consists of an **API layer**, **engines**, **pipelines**, **predictors**
 ### 2.1 Module Dependency Map (Mermaid)
 ```
 flowchart LR
-  A1(FastAPI)
-  I1(Schema)
-  I2(Results Writer)
-  I3(File Utils)
-  E1(XTB)
-  E2(Psi4)
-  E3(Gaussian Stub)
-  P1(SMILES→XYZ)
-  P2(OPT→PROP)
-  P3(Predictor Flow)
-  R1(Kamlet–Jacobs)
-  R2(Keshavarz)
-  R3(ML Predictors)
-  U1(Viewer+Tabs)
-  U2(Ketcher)
+
+  subgraph API[API Layer]
+    A1[/FastAPI/]
+  end
+
+  subgraph IO[IO & Schema]
+    I1["Schema (Pydantic)"]
+    I2[Results Writer]
+    I3[File Utils]
+  end
+
+  subgraph ENG[Engines]
+    E1[XTB]
+    E2[Psi4]
+    E3["Gaussian (Stub)"]
+  end
+
+  subgraph PIPE[Pipelines]
+    P1[SMILES→XYZ]
+    P2[OPT→PROP]
+    P3[Predictor Flow]
+  end
+
+  subgraph PRED[Predictors]
+    R1[Kamlet–Jacobs]
+    R2[Keshavarz]
+    R3[ML Predictors]
+  end
+
+  subgraph UI[UI Layer]
+    U1[Viewer + Tabs]
+    U2[Ketcher]
+  end
 
   A1 --> I1
   A1 --> I2
