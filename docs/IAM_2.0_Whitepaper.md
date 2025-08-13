@@ -54,33 +54,22 @@ IAM 2.0 is a schema‑first, engine‑agnostic, UI‑centric platform that unifi
 ### 2.1 Architecture (Mermaid)
 ```mermaid
 flowchart LR
-  subgraph API[API Layer]
-    A1[/FastAPI/]
-  end
-  subgraph IO[IO & Schema]
-    I1[Schema (Pydantic)]
-    I2[Results Writer]
-    I3[File Utils]
-  end
-    subgraph ENG[Engines]
-    E1[XTB]
-    E2[Psi4]
-    E3[Gaussian (HPC Stub)]
-  end
-  subgraph PIPE[Pipelines]
-    P1[SMILES→XYZ]
-    P2[OPT→PROP]
-    P3[Predictor Flow]
-  end
-  subgraph PRED[Predictors]
-    R1[Kamlet–Jacobs]
-    R2[Keshavarz]
-    R3[ML Predictors]
-  end
-  subgraph UI[UI Layer]
-    U1[Viewer + Tabs]
-    U2[Ketcher]
-  end
+  A1(FastAPI)
+  I1(Schema)
+  I2(Results Writer)
+  I3(File Utils)
+  E1(XTB)
+  E2(Psi4)
+  E3(Gaussian Stub)
+  P1(SMILES→XYZ)
+  P2(OPT→PROP)
+  P3(Predictor Flow)
+  R1(Kamlet–Jacobs)
+  R2(Keshavarz)
+  R3(ML Predictors)
+  U1(Viewer+Tabs)
+  U2(Ketcher)
+
   A1 --> I1
   A1 --> I2
   A1 --> P1
@@ -93,16 +82,6 @@ flowchart LR
   I2 --> U1
   A1 --> U1
   U2 --> A1
-  classDef api fill:#FFF3B0,stroke:#E0B600,stroke-width:1px;
-  classDef eng fill:#C2F970,stroke:#3D9B00,stroke-width:1px;
-  classDef pred fill:#FFC78E,stroke:#C56700,stroke-width:1px;
-  classDef io fill:#D0B3FF,stroke:#6C2CF1,stroke-width:1px;
-  classDef ui fill:#BDE0FE,stroke:#2776C9,stroke-width:1px;
-  class A1 api;
-  class E1,E2,E3 eng;
-  class R1,R2,R3 pred;
-  class I1,I2,I3 io;
-  class U1,U2 ui;
 ```
 
 ### 2.2 Data Pipeline
