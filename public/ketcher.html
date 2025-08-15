@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAM-2.0 × Ketcher - Molecular Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .header .subtitle {
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 1rem;
+            padding: 1rem;
+            min-height: 0;
+        }
+        
+        .editor-panel {
+            flex: 2;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .controls-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .control-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .control-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #7f8c8d;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover:not(:disabled) {
+            background: #e67e22;
+        }
+        
+        #ketcherFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .results {
+            background: #ecf0f1;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .results pre {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .status.success {
+            background: #d5f4e6;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1b0b7;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #b8daff;
+        }
+        
+        .method-selector {
+            margin-bottom: 1rem;
+        }
+        
+        .method-selector select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            position: relative;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 IAM-2.0 × Ketcher</h1>
+        <div class="subtitle">Integrated Analysis of Materials - Molecular Analysis Interface</div>
+    </div>
+
+    <div class="main-content">
+        <div class="editor-panel">
+            <iframe 
+                id="ketcherFrame" 
+                src="/static/ketcher/index.html"
+                title="Ketcher Molecular Editor">
+            </iframe>
+        </div>
+
+        <div class="controls-panel">
+            <!-- Export Section -->
+            <div class="control-section">
+                <h3>🔄 Export & Convert</h3>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="exportToSmiles()">
+                        📄 Export to SMILES
+                    </button>
+                    <button class="btn btn-primary" onclick="convertMolfile()">
+                        🔄 Convert Molfile
+                    </button>
+                    <button class="btn btn-primary" onclick="exportToXYZ()">
+                        📐 Export to XYZ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div class="control-section">
+                <h3>⚗️ Molecular Analysis</h3>
+                <div class="method-selector">
+                    <select id="analysisMethod">
+                        <option value="empirical">Empirical Properties</option>
+                        <option value="cj">Chapman-Jouguet (CJ)</option>
+                        <option value="xtb">xTB Quantum</option>
+                        <option value="psi4">Psi4 Quantum</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="runAnalysis()">
+                        🚀 Run Analysis
+                    </button>
+                    <button class="btn btn-warning" onclick="exportResults()">
+                        📦 Export Results (ZIP)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Utilities Section -->
+            <div class="control-section">
+                <h3>🛠️ Utilities</h3>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="clearEditor()">
+                        🗑️ Clear Editor
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadSample()">
+                        🧪 Load Sample (Methane)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results area -->
+    <div id="resultsArea" class="results" style="display: none;">
+        <h4>Results:</h4>
+        <pre id="resultsContent"></pre>
+    </div>
+
+    <!-- Load bridge.js -->
+    <script src="/static/ketcher/bridge.js"></script>
+
+    <script>
+        // Global state
+        let lastResults = null;
+        let artifactPaths = [];
+
+        // Utility functions
+        function showResults(data, status = 'info') {
+            const resultsArea = document.getElementById('resultsArea');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            resultsArea.style.display = 'block';
+            resultsContent.textContent = JSON.stringify(data, null, 2);
+            
+            // Add status indicator
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${status}`;
+            statusDiv.textContent = status === 'success' ? 'Operation successful' : 
+                                   status === 'error' ? 'Operation failed' : 'Operation completed';
+            
+            resultsArea.insertBefore(statusDiv, resultsContent);
+            
+            // Scroll to results
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function setLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('loading');
+            } else {
+                button.disabled = false;
+                button.classList.remove('loading');
+            }
+        }
+
+        async function makeApiCall(endpoint, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+                
+                const response = await fetch(endpoint, options);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${data.message || 'Request failed'}`);
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API call failed:', error);
+                throw error;
+            }
+        }
+
+        // Export functions
+        async function exportToSmiles() {
+            const button = event.target;
+            setLoading(button, true);
+            
+            try {
+                const molfile = await window.ketcherBridge.getMolfile();
+                if (!molfile) {
+                    throw new Error('No molecule drawn');
+                }
+                
+                const result = await makeApiCall('/ketcher/to-smiles', 'POST', { molfile });
+                showResults(result, 'success');
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            } finally {
+                setLoading(button, false);
+            }
+        }
+
+        async function convertMolfile() {
+            const button = event.target;
+            setLoading(button, true);
+            
+            try {
+                const molfile = await window.ketcherBridge.getMolfile();
+                if (!molfile) {
+                    throw new Error('No molecule drawn');
+                }
+                
+                const result = await makeApiCall('/convert/molfile', 'POST', { molfile });
+                showResults(result, 'success');
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            } finally {
+                setLoading(button, false);
+            }
+        }
+
+        async function exportToXYZ() {
+            const button = event.target;
+            setLoading(button, true);
+            
+            try {
+                const molfile = await window.ketcherBridge.getMolfile();
+                if (!molfile) {
+                    throw new Error('No molecule drawn');
+                }
+                
+                const result = await makeApiCall('/ketcher/to-xyz', 'POST', { molfile });
+                showResults(result, 'success');
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            } finally {
+                setLoading(button, false);
+            }
+        }
+
+        async function runAnalysis() {
+            const button = event.target;
+            const method = document.getElementById('analysisMethod').value;
+            setLoading(button, true);
+            
+            try {
+                const smiles = await window.ketcherBridge.getSmiles();
+                if (!smiles) {
+                    throw new Error('No molecule drawn or unable to generate SMILES');
+                }
+                
+                const result = await makeApiCall('/ketcher/run', 'POST', { 
+                    smiles, 
+                    method 
+                });
+                
+                showResults(result, 'success');
+                lastResults = result;
+                
+                // Store artifact paths if present
+                if (result.data && result.data.artifact_path) {
+                    artifactPaths.push(result.data.artifact_path);
+                }
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            } finally {
+                setLoading(button, false);
+            }
+        }
+
+        async function exportResults() {
+            const button = event.target;
+            setLoading(button, true);
+            
+            try {
+                if (artifactPaths.length === 0) {
+                    throw new Error('No analysis results to export. Run an analysis first.');
+                }
+                
+                const result = await makeApiCall('/export/zip', 'POST', { 
+                    artifacts: artifactPaths 
+                });
+                
+                showResults(result, 'success');
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            } finally {
+                setLoading(button, false);
+            }
+        }
+
+        // Utility functions
+        async function clearEditor() {
+            try {
+                await window.ketcherBridge.clear();
+                
+                // Clear results
+                const resultsArea = document.getElementById('resultsArea');
+                resultsArea.style.display = 'none';
+                
+                // Clear stored data
+                lastResults = null;
+                artifactPaths = [];
+                
+                showResults({ message: 'Editor cleared' }, 'info');
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            }
+        }
+
+        async function loadSample() {
+            try {
+                // Methane SMILES
+                await window.ketcherBridge.setSmiles('C');
+                showResults({ message: 'Sample molecule (methane) loaded' }, 'info');
+                
+            } catch (error) {
+                showResults({ error: error.message }, 'error');
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            console.log('🧪 IAM-2.0 × Ketcher UI initialized');
+            
+            // Wait for Ketcher to be ready
+            const checkReady = setInterval(() => {
+                if (window.ketcherBridge && window.ketcherBridge.ready) {
+                    clearInterval(checkReady);
+                    console.log('✅ Ketcher integration ready');
+                    
+                    // Show welcome message
+                    showResults({
+                        message: 'IAM-2.0 × Ketcher integration ready',
+                        instructions: [
+                            '1. Draw a molecule in the editor',
+                            '2. Use Export buttons to convert formats',
+                            '3. Use Analysis buttons to run computations',
+                            '4. Export results as ZIP files'
+                        ]
+                    }, 'info');
+                }
+            }, 500);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                clearInterval(checkReady);
+                if (!window.ketcherBridge || !window.ketcherBridge.ready) {
+                    showResults({
+                        error: 'Ketcher failed to initialize',
+                        troubleshooting: 'Try refreshing the page'
+                    }, 'error');
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
