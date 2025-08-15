@@ -1,4 +1,3 @@
----
 name: iam2
 channels:
   - conda-forge
