@@ -2,6 +2,7 @@
 - Added repo guardrails (.copilot-instructions.md), VS Code settings, and chem-env.yaml for conda/mamba environment.
 - Updated README with install instructions and Makefile to default to python3 and run FastAPI app via uvicorn.
 - Created backend app wiring (FastAPI) and common schema helpers (ok/fail) in iam/backend/app.py and iam/backend/schemas/common.py.
+<<<<<<< HEAD
 
 ## Part B / Step 1 (2025-08-15)
 - Added FastAPI app wiring and included routers for xtb, psi4, empirical, cj.
@@ -16,3 +17,5 @@
 - Implemented predict_empirical interface to select method.
 - Wired /compute/empirical route to use empirical predictor.
 - Added unit tests for empirical predictor and route.
+=======
+>>>>>>> 97bef5987a208f7567dab871e3035c9092c02cdc
