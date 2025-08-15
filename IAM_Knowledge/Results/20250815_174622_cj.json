@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "data": {
+    "Pcj": 1.23,
+    "Tcj": 3456.0,
+    "VoD": null,
+    "products": [],
+    "artifacts": {
+      "species_db": "default",
+      "input_sum": 3.0,
+      "used_metals": false
+    }
+  },
+  "errors": []
+}

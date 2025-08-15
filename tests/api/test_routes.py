@@ -12,9 +12,15 @@ client = TestClient(app)
 ])
 def test_compute_routes(route):
     resp = client.post(route, json={"payload": {"test": True}})
-    assert resp.status_code == 200
-    data = resp.json()
-    assert set(data.keys()) == {"ok", "data", "errors"}
-    assert isinstance(data["ok"], bool)
-    assert isinstance(data["data"], dict)
-    assert isinstance(data["errors"], list)
+    if route == "/compute/cj":
+        # Invalid payload for /compute/cj should return 422 and have 'detail' key
+        assert resp.status_code == 422
+        data = resp.json()
+        assert "detail" in data
+    else:
+        assert resp.status_code == 200
+        data = resp.json()
+        assert set(data.keys()) == {"ok", "data", "errors"}
+        assert isinstance(data["ok"], bool)
+        assert isinstance(data["data"], dict)
+        assert isinstance(data["errors"], list)

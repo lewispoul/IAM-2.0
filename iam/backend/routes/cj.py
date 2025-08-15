@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from iam.backend.schemas.common import ok, fail
 from pydantic import BaseModel
 
@@ -24,14 +24,15 @@ async def compute_cj(req: CJRequest):
             metals=req.metals,
             species_db=req.species_db,
         )
-        resp = ok(result)
-        if resp["ok"]:
-            save_result_json("cj", resp)
-            bench = {"name": "cj", "ok": True}
-            for k in ["Pcj", "Tcj", "VoD"]:
-                if k in result:
-                    bench[k] = result[k]
-            append_benchmark_row(bench)
-        return resp
     except Exception as e:
-        return fail([str(e)])
+        # Raise HTTPException for validation errors so FastAPI returns 422
+        raise HTTPException(status_code=422, detail=str(e))
+    resp = ok(result)
+    if resp["ok"]:
+        save_result_json("cj", resp)
+        bench = {"name": "cj", "ok": True}
+        for k in ["Pcj", "Tcj", "VoD"]:
+            if k in result:
+                bench[k] = result[k]
+        append_benchmark_row(bench)
+    return resp

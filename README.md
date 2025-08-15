@@ -1,5 +1,7 @@
 ## Quick Start: Environment Setup
 
+> **Note:** The `iam2` conda environment is now set to auto-activate for all new terminal sessions via your `~/.bashrc` file. You do not need to manually activate it each time.
+
 ```sh
 # Create and activate the IAM2 environment (recommended)
 mamba create -n iam2 -f chem-env.yaml   # or: conda env create -f chem-env.yaml
