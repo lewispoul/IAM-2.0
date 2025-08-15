@@ -10,6 +10,29 @@ make verify    # Check required packages
 make run       # Start backend API
 ```
 
+## Local Ketcher (no iframe blocking)
+
+IAM-2.0 now includes local Ketcher hosting to avoid cross-site iframe issues:
+
+```bash
+bash scripts/fetch_ketcher.sh    # Download Ketcher locally
+make run                         # Start backend
+open http://localhost:8011/      # Main UI with local Ketcher
+```
+
+**Available interfaces:**
+
+- **Main UI**: `http://localhost:8011/` - Full molecular analysis interface
+- **Direct Ketcher**: `http://localhost:8011/static/ketcher/index.html` - Molecular editor only
+- **API Docs**: `http://localhost:8011/docs` - Interactive API documentation
+
+**Troubleshooting:**
+
+- If "Firefox Can't Open This Page": Use Chrome/Chromium instead
+- If Ketcher doesn't load: Check `/static/ketcher` is ignored by git
+- Static files are served from `public/static/ketcher/` (vendor files ignored)
+
+
 # IAM 2.0 — Intelligent Agent for Molecules
 ![IAM UI](docs/images/IAM-2.0UI.png)
 

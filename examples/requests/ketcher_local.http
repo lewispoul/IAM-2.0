@@ -1,0 +1,110 @@
+# IAM-2.0 Local Ketcher Integration Examples
+# Use VS Code REST Client extension to run these requests
+# Base URL: http://localhost:8011 (ensure backend is running)
+
+### Health Check
+GET http://localhost:8011/health
+
+### Main UI (local Ketcher)
+GET http://localhost:8011/
+
+### Direct Ketcher Access
+GET http://localhost:8011/static/ketcher/index.html
+
+### Export to SMILES (methane example)
+POST http://localhost:8011/ketcher/to-smiles
+Content-Type: application/json
+
+{
+  "molfile": "\n  Ketcher  1234567890\n\n  1  0  0  0  0  0  0  0  0  0999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\nM  END"
+}
+
+### Convert Molfile (methane example)
+POST http://localhost:8011/convert/molfile
+Content-Type: application/json
+
+{
+  "molfile": "\n  Ketcher  1234567890\n\n  1  0  0  0  0  0  0  0  0  0999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\nM  END"
+}
+
+### Export to XYZ (methane example)
+POST http://localhost:8011/ketcher/to-xyz
+Content-Type: application/json
+
+{
+  "molfile": "\n  Ketcher  1234567890\n\n  1  0  0  0  0  0  0  0  0  0999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\nM  END"
+}
+
+### Run Empirical Analysis
+POST http://localhost:8011/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "empirical"
+}
+
+### Run CJ Analysis
+POST http://localhost:8011/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "cj"
+}
+
+### Run xTB Analysis
+POST http://localhost:8011/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "xtb"
+}
+
+### Run Psi4 Analysis
+POST http://localhost:8011/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "psi4"
+}
+
+### Export Results ZIP (requires artifact paths from previous runs)
+POST http://localhost:8011/export/zip
+Content-Type: application/json
+
+{
+  "artifacts": [
+    "Results/20250815_123456_empirical.json"
+  ]
+}
+
+### Error Examples
+
+### Invalid molfile format
+POST http://localhost:8011/ketcher/to-smiles
+Content-Type: application/json
+
+{
+  "molfile": "invalid molfile"
+}
+
+### Invalid SMILES
+POST http://localhost:8011/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "invalid_smiles",
+  "method": "empirical"
+}
+
+### Invalid method
+POST http://localhost:8011/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "invalid_method"
+}
