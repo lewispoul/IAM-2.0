@@ -510,35 +510,41 @@
         window.addEventListener('load', () => {
             console.log('🧪 IAM-2.0 × Ketcher UI initialized');
             
-            // Wait for Ketcher to be ready
-            const checkReady = setInterval(() => {
-                if (window.ketcherBridge && window.ketcherBridge.ready) {
-                    clearInterval(checkReady);
-                    console.log('✅ Ketcher integration ready');
-                    
-                    // Show welcome message
-                    showResults({
-                        message: 'IAM-2.0 × Ketcher integration ready',
-                        instructions: [
-                            '1. Draw a molecule in the editor',
-                            '2. Use Export buttons to convert formats',
-                            '3. Use Analysis buttons to run computations',
-                            '4. Export results as ZIP files'
-                        ]
-                    }, 'info');
-                }
-            }, 500);
+            // Listen for Ketcher ready events
+            document.addEventListener('ketcherReady', (event) => {
+                console.log('✅ Ketcher integration ready');
+                showResults({
+                    message: 'IAM-2.0 × Ketcher integration ready',
+                    status: 'Ketcher molecular editor loaded successfully',
+                    instructions: [
+                        '1. Draw a molecule in the editor',
+                        '2. Use Export buttons to convert formats',
+                        '3. Use Analysis buttons to run computations',
+                        '4. Export results as ZIP files'
+                    ]
+                }, 'success');
+            });
             
-            // Timeout after 10 seconds
-            setTimeout(() => {
-                clearInterval(checkReady);
-                if (!window.ketcherBridge || !window.ketcherBridge.ready) {
-                    showResults({
-                        error: 'Ketcher failed to initialize',
-                        troubleshooting: 'Try refreshing the page'
-                    }, 'error');
-                }
-            }, 10000);
+            document.addEventListener('ketcherTimeout', (event) => {
+                console.warn('⚠️ Ketcher initialization timeout');
+                showResults({
+                    error: 'Ketcher initialization timeout',
+                    message: 'The molecular editor is taking longer than expected to load',
+                    troubleshooting: [
+                        'Check your internet connection',
+                        'Try refreshing the page',
+                        'Check browser console for errors',
+                        'Ensure CDN resources are accessible'
+                    ]
+                }, 'error');
+            });
+            
+            // Show initial loading message
+            showResults({
+                message: 'Initializing IAM-2.0 × Ketcher integration',
+                status: 'Loading molecular editor...',
+                note: 'This may take a few moments'
+            }, 'info');
         });
     </script>
 </body>
