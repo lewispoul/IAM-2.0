@@ -28,8 +28,8 @@ if os.path.exists(static_dir):
 
 @app.get("/")
 async def serve_ui():
-    """Serve the Ketcher UI for easy access"""
-    ui_file = os.path.join(os.path.dirname(__file__), "../../frontend/ketcher_test.html")
+    """Serve the main Ketcher UI"""
+    ui_file = os.path.join(os.path.dirname(__file__), "../../public/ketcher.html")
     if os.path.exists(ui_file):
         return FileResponse(ui_file, media_type="text/html")
     else:
@@ -37,9 +37,10 @@ async def serve_ui():
         <html>
             <body>
                 <h1>🧪 IAM-2.0 API Server</h1>
-                <p>API is running! Access the UI at:</p>
-                <p><code>file:///home/lppoulin/IAM-2.0/frontend/ketcher_test.html</code></p>
-                <p>Or view API docs at: <a href="/docs">/docs</a></p>
+                <p>API is running! Main UI not found.</p>
+                <p>Expected location: <code>public/ketcher.html</code></p>
+                <p>View API docs at: <a href="/docs">/docs</a></p>
+                <p>Access Ketcher directly: <a href="/static/ketcher/index.html">/static/ketcher/index.html</a></p>
             </body>
         </html>
         """)
