@@ -1,0 +1,17 @@
+---
+name: iam2
+channels:
+  - conda-forge
+  - psi4
+dependencies:
+  - python=3.10
+  - rdkit
+  - psi4
+  - cantera
+  - xtb
+  - xtb-python
+  - uvicorn
+  - fastapi
+  - pydantic
+  - pytest
+---

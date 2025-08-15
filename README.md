@@ -1,3 +1,13 @@
+## Quick Start: Environment Setup
+
+```sh
+# Create and activate the IAM2 environment (recommended)
+mamba create -n iam2 -f chem-env.yaml   # or: conda env create -f chem-env.yaml
+conda activate iam2
+make verify    # Check required packages
+make run       # Start backend API
+```
+
 # IAM 2.0 — Intelligent Agent for Molecules
 ![IAM UI](docs/images/IAM-2.0UI.png)
 
