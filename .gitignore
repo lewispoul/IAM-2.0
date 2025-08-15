@@ -1,3 +1,7 @@
 
 # Ignore installers / large binaries
 Miniconda*-Linux-*.sh
+
+# Ignore Ketcher vendor files (but keep README.local.md)
+public/static/ketcher/**
+!public/static/ketcher/README.local.md
