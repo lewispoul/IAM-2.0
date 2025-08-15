@@ -44,7 +44,7 @@ def test_ketcher_run_empirical():
 
 def test_ketcher_run_bad_method():
     resp = client.post("/ketcher/run", json={"smiles": "C", "method": "unknown"})
-    assert resp.status_code == 200
+    assert resp.status_code == 501  # Proper error status
     data = resp.json()
-    assert data["ok"] is False
-    assert data["errors"]
+    assert "correlation_id" in data
+    assert "not implemented" in data["message"]

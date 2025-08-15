@@ -1,0 +1,88 @@
+### Compute XTB - Success Case
+POST http://localhost:8010/compute/xtb
+Content-Type: application/json
+
+{
+  "payload": {
+    "smiles": "C",
+    "options": {
+      "method": "GFN2-xTB",
+      "opt": true
+    }
+  }
+}
+
+### Compute XTB - Error Case (invalid payload)
+POST http://localhost:8010/compute/xtb
+Content-Type: application/json
+
+{
+  "payload": {
+    "invalid_field": "test"
+  }
+}
+
+### Compute Psi4 - Success Case  
+POST http://localhost:8010/compute/psi4
+Content-Type: application/json
+
+{
+  "payload": {
+    "smiles": "C",
+    "options": {
+      "method": "B3LYP",
+      "basis": "6-31G*"
+    }
+  }
+}
+
+### Compute Psi4 - Error Case (missing payload)
+POST http://localhost:8010/compute/psi4
+Content-Type: application/json
+
+{
+  "invalid_structure": true
+}
+
+### Compute Empirical - Success Case
+POST http://localhost:8010/compute/empirical
+Content-Type: application/json
+
+{
+  "payload": {
+    "formula": "H2O",
+    "method": "KJ"
+  }
+}
+
+### Compute Empirical - Error Case (invalid method)
+POST http://localhost:8010/compute/empirical
+Content-Type: application/json
+
+{
+  "payload": {
+    "formula": "H2O",
+    "method": "INVALID_METHOD"
+  }
+}
+
+### Compute CJ (Chapman-Jouguet) - Success Case
+POST http://localhost:8010/compute/cj
+Content-Type: application/json
+
+{
+  "stoich": {
+    "H2": 2,
+    "O2": 1
+  },
+  "rho0": 1.6
+}
+
+### Compute CJ - Error Case (invalid stoichiometry)
+POST http://localhost:8010/compute/cj
+Content-Type: application/json
+
+{
+  "stoich": "invalid_string",
+  "rho0": 1.6
+}

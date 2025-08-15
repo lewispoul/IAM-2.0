@@ -1,15 +1,21 @@
-### Ketcher to XYZ (from molfile)
+### Ketcher to XYZ (from molfile) - Success Case
 POST http://localhost:8010/ketcher/to-xyz
 Content-Type: application/json
 
 {
-  "molfile": "\n  Methane example\n  OpenAI2025\n\n  5  4  0  0  0  0            999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291    0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291   -0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291   -0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291    0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0\n  1  3  1  0\n  1  4  1  0\n  1  5  1  0\nM  END\n"
+  "molfile": "\n  Methane\n\n  5  4  0  0  0  0  0  0  0  0999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291    0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291   -0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291   -0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291    0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0  0  0  0\n  1  3  1  0  0  0  0\n  1  4  1  0  0  0  0\n  1  5  1  0  0  0  0\nM  END\n"
 }
 
-### Ketcher to XYZ (from smiles)
+### Ketcher to XYZ (from smiles) - Success Case
 POST http://localhost:8010/ketcher/to-xyz
 Content-Type: application/json
 
 {
   "smiles": "C"
 }
+
+### Ketcher to XYZ - Empty request (still works due to optional fields)
+POST http://localhost:8010/ketcher/to-xyz
+Content-Type: application/json
+
+{}

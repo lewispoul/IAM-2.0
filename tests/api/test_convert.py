@@ -31,7 +31,7 @@ M  END
 
 def test_convert_molfile_bad():
     resp = client.post("/convert/molfile", json={"molfile": ""})
-    assert resp.status_code == 200
+    assert resp.status_code == 400  # Proper error status
     data = resp.json()
-    assert data["ok"] is False
-    assert data["errors"]
+    assert "correlation_id" in data
+    assert "molfile must be a non-empty string" in data["message"]

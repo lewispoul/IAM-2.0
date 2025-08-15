@@ -1,18 +1,44 @@
-### Ketcher Run (empirical)
-POST http://localhost:8010/ketcher/run
-Content-Type: application/json
-
-{
-  "molfile": "\n  Methane example\n  OpenAI2025\n\n  5  4  0  0  0  0            999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291    0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291   -0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291   -0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291    0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0\n  1  3  1  0\n  1  4  1  0\n  1  5  1  0\nM  END\n",
-  "method": "empirical"
-}
-
-### Ketcher Run (cj, explicit)
+### Ketcher Run (empirical) - Success Case
 POST http://localhost:8010/ketcher/run
 Content-Type: application/json
 
 {
   "smiles": "C",
-  "method": "cj",
-  "options": {"stoich": {"C": 1}, "rho0": 1.0}
+  "method": "empirical"
+}
+
+### Ketcher Run (cj) - Success Case  
+POST http://localhost:8010/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "cj"
+}
+
+### Ketcher Run (empirical with molfile) - Success Case
+POST http://localhost:8010/ketcher/run
+Content-Type: application/json
+
+{
+  "molfile": "\n  Methane\n\n  5  4  0  0  0  0  0  0  0  0999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291    0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291   -0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6291   -0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.6291    0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0  0  0  0\n  1  3  1  0  0  0  0\n  1  4  1  0  0  0  0\n  1  5  1  0  0  0  0\nM  END\n",
+  "method": "empirical"
+}
+
+### Ketcher Run - Error Case (invalid method)
+POST http://localhost:8010/ketcher/run
+Content-Type: application/json
+
+{
+  "smiles": "C",
+  "method": "invalid_method"
+}
+
+### Ketcher Run - Error Case (invalid molfile)
+POST http://localhost:8010/ketcher/run
+Content-Type: application/json
+
+{
+  "molfile": "invalid molfile content",
+  "method": "empirical"
 }

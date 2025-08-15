@@ -1,0 +1,38 @@
+### Export Zip - Success Case (valid artifacts)
+POST http://localhost:8010/export/zip
+Content-Type: application/json
+
+{
+  "artifacts": [
+    "Results/example_result.json",
+    "benchmark_auto.csv"
+  ]
+}
+
+### Export Zip - Empty artifacts list (should create empty zip)
+POST http://localhost:8010/export/zip
+Content-Type: application/json
+
+{
+  "artifacts": []
+}
+
+### Export Zip - Error Case (path traversal attempt)
+POST http://localhost:8010/export/zip
+Content-Type: application/json
+
+{
+  "artifacts": [
+    "../../../etc/passwd"
+  ]
+}
+
+### Export Zip - Error Case (file not found)
+POST http://localhost:8010/export/zip
+Content-Type: application/json
+
+{
+  "artifacts": [
+    "nonexistent_file.json"
+  ]
+}
