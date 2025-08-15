@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "data": {
+    "Pcj": 25.0,
+    "Tcj": 3500.0,
+    "VoD": 7.5,
+    "input": {
+      "smiles": "",
+      "options": {}
+    }
+  },
+  "errors": []
+}

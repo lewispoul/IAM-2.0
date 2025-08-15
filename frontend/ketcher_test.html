@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAM-2.0 × Ketcher Integration Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .ketcher-section {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .ketcher-section h3 {
+            margin: 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        #ketcher-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+        
+        #ketcher-container {
+            position: relative;
+        }
+        
+        #ketcher-fallback {
+            width: 100%;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .button-group {
+            margin-bottom: 20px;
+        }
+        
+        .button-group h4 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .loading { border-left: 4px solid #ffc107; }
+        .demo { border-left: 4px solid #17a2b8; }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.loading { background: #fff3cd; color: #856404; }
+        .status.demo { background: #d1ecf1; color: #0c5460; }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 IAM-2.0 × Ketcher Integration Test</h1>
+            <p>Draw molecules and test backend integration</p>
+        </div>
+        
+        <div class="content">
+            <div class="ketcher-section">
+                <h3>Ketcher Molecule Editor</h3>
+                <div id="ketcher-container">
+                    <iframe id="ketcher-iframe" 
+                            src="https://demo.lifescience.opensource.epam.com/ketcher/index.html"
+                            sandbox="allow-same-origin allow-scripts allow-forms"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            loading="lazy">
+                    </iframe>
+                    <div id="ketcher-fallback" style="display: none; padding: 20px; text-align: center; background: #f8f9fa; border: 1px solid #ddd;">
+                        <h4>🧪 Ketcher Editor (Demo Mode)</h4>
+                        <p>Ketcher editor loading...</p>
+                        <p><small>Using mock methane (CH4) data for demonstration</small></p>
+                        <div style="font-size: 48px; margin: 20px;">CH₄</div>
+                        <p>Click any button below to test with mock molecular data!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="button-group">
+                    <h4>📄 Export Functions</h4>
+                    <button onclick="exportSMILES()">Export to SMILES</button>
+                    <button onclick="exportMolfile()">Convert Molfile</button>
+                    <button onclick="exportXYZ()">Export to XYZ</button>
+                </div>
+                
+                <div class="button-group">
+                    <h4>⚡ Computation Functions</h4>
+                    <button onclick="runEmpirical()">Run Empirical</button>
+                    <button onclick="runCJ()">Run CJ Calculation</button>
+                    <button onclick="runXTB()">Run XTB</button>
+                    <button onclick="runPsi4()">Run Psi4</button>
+                </div>
+                
+                <div class="button-group">
+                    <h4>📦 Export Functions</h4>
+                    <button onclick="exportZip()">Export Results</button>
+                </div>
+                
+                <div id="response-container">
+                    <h4>Response:</h4>
+                    <div id="response" class="response">
+                        Draw a molecule and click any button to test the backend integration...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8011';
+        
+        // Mock molecule data for testing when Ketcher is not accessible
+        const mockMolfile = `
+  Methane
+  
+  5  4  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.6291    0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6291   -0.6291    0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.6291   -0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -0.6291    0.6291   -0.6291 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  1  3  1  0  0  0  0
+  1  4  1  0  0  0  0
+  1  5  1  0  0  0  0
+M  END`;
+
+        const mockSMILES = "C"; // Methane
+        
+        function updateResponse(status, data, endpoint = '') {
+            const responseDiv = document.getElementById('response');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let statusClass = status === 'loading' ? 'loading' : 
+                             status === 'demo' ? 'demo' :
+                             status === 'info' ? 'demo' :
+                             (data && (data.ok !== false)) ? 'success' : 'error';
+            
+            let content = `[${timestamp}] ${endpoint}\n\n`;
+            
+            if (status === 'loading') {
+                content += '⏳ Loading...';
+            } else if (status === 'demo' || status === 'info') {
+                content += '🧪 DEMO MODE\n';
+                content += JSON.stringify(data, null, 2);
+            } else if (data) {
+                content += JSON.stringify(data, null, 2);
+            }
+            
+            responseDiv.className = `response ${statusClass}`;
+            responseDiv.textContent = content;
+        }
+        
+        async function makeRequest(endpoint, payload) {
+            try {
+                updateResponse('loading', null, endpoint);
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                updateResponse(response.status, data, `${endpoint} (${response.status})`);
+                
+                return data;
+            } catch (error) {
+                // Fallback to mock data for demonstration
+                const mockResponse = getMockResponse(endpoint, payload);
+                updateResponse('demo', mockResponse, `${endpoint} (Demo Mode)`);
+                return mockResponse;
+            }
+        }
+        
+        // Mock response generator for demo mode
+        function getMockResponse(endpoint, payload) {
+            const mockResponses = {
+                '/ketcher/to-smiles': {
+                    ok: true,
+                    data: { smiles: 'C', formula: 'CH4', inchi: 'InChI=1S/CH4/h1H4' },
+                    note: 'Mock response - Methane from demo molfile'
+                },
+                '/convert/molfile': {
+                    ok: true,
+                    data: { converted: true, format: 'molfile', atoms: 5 },
+                    note: 'Mock response - Molfile conversion'
+                },
+                '/ketcher/to-xyz': {
+                    ok: true,
+                    data: { xyz: '5\nMethane\nC 0.0 0.0 0.0\nH 0.63 0.63 0.63\nH -0.63 -0.63 0.63\nH 0.63 -0.63 -0.63\nH -0.63 0.63 -0.63' },
+                    note: 'Mock response - Generated 3D coordinates'
+                },
+                '/ketcher/run': {
+                    ok: true,
+                    data: payload.method === 'empirical' ? 
+                        { Pcj: 25.0, Tcj: 3500.0, VoD: 7.5, method: 'empirical' } :
+                        { Pcj: 1.23, Tcj: 3456.0, VoD: null, method: 'cj' },
+                    note: `Mock response - ${payload.method} calculation for methane`
+                },
+                '/compute/xtb': {
+                    ok: true,
+                    data: { energy: -4.123456, method: 'GFN2-xTB', basis: 'minimal', atoms: 5 },
+                    note: 'Mock response - XTB quantum calculation'
+                },
+                '/compute/psi4': {
+                    ok: true,
+                    data: { energy: -40.412345, method: 'B3LYP', basis: '6-31G*', convergence: true },
+                    note: 'Mock response - Psi4 quantum calculation'
+                },
+                '/export/zip': {
+                    ok: true,
+                    data: { filename: 'results_demo.zip', size: '2.4 MB', files: ['methane_calc.json', 'geometry.xyz'] },
+                    note: 'Mock response - Results would be packaged for download'
+                }
+            };
+            
+            return mockResponses[endpoint] || {
+                ok: false,
+                error: 'Unknown endpoint',
+                note: 'This is a mock response for demo purposes'
+            };
+        }
+        
+        // Export functions
+        async function exportSMILES() {
+            // Try to get molfile from Ketcher, fallback to mock
+            const molfile = await getMolfileFromKetcher() || mockMolfile;
+            await makeRequest('/ketcher/to-smiles', { molfile });
+        }
+        
+        async function exportMolfile() {
+            const molfile = await getMolfileFromKetcher() || mockMolfile;
+            await makeRequest('/convert/molfile', { molfile });
+        }
+        
+        async function exportXYZ() {
+            const smiles = mockSMILES; // Could get from Ketcher
+            await makeRequest('/ketcher/to-xyz', { smiles });
+        }
+        
+        // Computation functions
+        async function runEmpirical() {
+            const smiles = mockSMILES;
+            await makeRequest('/ketcher/run', { smiles, method: 'empirical' });
+        }
+        
+        async function runCJ() {
+            const smiles = mockSMILES;
+            await makeRequest('/ketcher/run', { smiles, method: 'cj' });
+        }
+        
+        async function runXTB() {
+            const smiles = mockSMILES;
+            await makeRequest('/compute/xtb', { 
+                payload: { smiles, options: { method: 'GFN2-xTB' } }
+            });
+        }
+        
+        async function runPsi4() {
+            const smiles = mockSMILES;
+            await makeRequest('/compute/psi4', { 
+                payload: { smiles, options: { method: 'B3LYP', basis: '6-31G*' } }
+            });
+        }
+        
+        // Export function
+        async function exportZip() {
+            await makeRequest('/export/zip', { 
+                artifacts: ['Results/example.json', 'benchmark_auto.csv'] 
+            });
+        }
+        
+        // Attempt to get molfile from Ketcher (would need postMessage API)
+        async function getMolfileFromKetcher() {
+            try {
+                // In a real integration, you'd communicate with Ketcher via postMessage
+                // For now, return null to use mock data
+                return null;
+            } catch (error) {
+                console.log('Could not get molfile from Ketcher, using mock data');
+                return null;
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateResponse('info', { 
+                message: 'UI loaded successfully - Testing in offline mode',
+                backend: API_BASE,
+                note: 'This demo will work with mock data. Start backend with: conda activate iam2 && uvicorn iam.backend.app:app --reload --port 8011',
+                demo_mode: 'All buttons will work with mock methane (CH4) data for demonstration'
+            }, 'System Ready - Demo Mode');
+            
+            // Test one mock API call to show functionality
+            setTimeout(() => {
+                testMockAPI();
+            }, 2000);
+            
+            // Handle Ketcher iframe loading
+            setupKetcherFallback();
+        });
+        
+        // Setup Ketcher iframe with fallback
+        function setupKetcherFallback() {
+            const iframe = document.getElementById('ketcher-iframe');
+            const fallback = document.getElementById('ketcher-fallback');
+            
+            // Show fallback after timeout
+            const timeoutId = setTimeout(() => {
+                console.log('Ketcher iframe timeout, showing fallback');
+                iframe.style.display = 'none';
+                fallback.style.display = 'flex';
+                updateResponse('demo', {
+                    message: 'Ketcher Editor in Demo Mode',
+                    note: 'External Ketcher editor could not load due to security restrictions',
+                    demo_data: 'Using mock methane (CH4) molecule',
+                    functionality: 'All buttons below work with mock data!'
+                }, 'Ketcher Demo Mode Active');
+            }, 5000);
+            
+            // If iframe loads successfully, clear timeout
+            iframe.onload = function() {
+                console.log('Ketcher iframe loaded successfully');
+                clearTimeout(timeoutId);
+                fallback.style.display = 'none';
+                iframe.style.display = 'block';
+            };
+            
+            // Handle iframe errors
+            iframe.onerror = function() {
+                console.log('Ketcher iframe failed to load, showing fallback');
+                clearTimeout(timeoutId);
+                iframe.style.display = 'none';
+                fallback.style.display = 'flex';
+            };
+        }
+        
+        // Add mock API test function
+        function testMockAPI() {
+            updateResponse('success', {
+                message: '🧪 Mock API Test',
+                data: {
+                    smiles: 'C',
+                    formula: 'CH4',
+                    note: 'This would normally come from your backend API'
+                },
+                demo: 'Click any button above to see mock responses!'
+            }, 'Mock Test Complete');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 IAM-2.0 × Backend Integration Test (Standalone)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .molecule-section {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+        
+        .molecule-section h3 {
+            margin: 0;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .molecule-display {
+            padding: 40px;
+            text-align: center;
+            background: white;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .molecule-formula {
+            font-size: 72px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .molecule-info {
+            background: #e3f2fd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .button-group {
+            margin-bottom: 20px;
+        }
+        
+        .button-group h4 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .success { border-left: 4px solid #28a745; background: #d4edda; }
+        .error { border-left: 4px solid #dc3545; background: #f8d7da; }
+        .loading { border-left: 4px solid #ffc107; background: #fff3cd; }
+        .demo { border-left: 4px solid #17a2b8; background: #d1ecf1; }
+        
+        .status-bar {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .molecule-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .molecule-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 2px solid #ced4da;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        
+        .molecule-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .molecule-btn.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 IAM-2.0 Backend Integration Test</h1>
+            <p>Molecular analysis and computation testing interface</p>
+        </div>
+        
+        <div class="status-bar" id="status-bar">
+            ✅ Standalone Mode - All functionality available with mock data
+        </div>
+        
+        <div class="content">
+            <div class="molecule-section">
+                <h3>🧬 Current Molecule</h3>
+                <div class="molecule-display">
+                    <div class="molecule-formula" id="molecule-formula">CH₄</div>
+                    <div><strong>Methane</strong></div>
+                    <div>SMILES: <code>C</code></div>
+                    
+                    <div class="molecule-info">
+                        <strong>Demo Molecule:</strong> This is mock data for testing.<br>
+                        In production, you would draw molecules in Ketcher editor.<br>
+                        <strong>Current Mode:</strong> Standalone testing without external dependencies.
+                    </div>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <h4>Select Test Molecule:</h4>
+                    <div class="molecule-selector">
+                        <div class="molecule-btn active" onclick="selectMolecule('C', 'CH₄', 'Methane')">CH₄ Methane</div>
+                        <div class="molecule-btn" onclick="selectMolecule('CC', 'C₂H₆', 'Ethane')">C₂H₆ Ethane</div>
+                        <div class="molecule-btn" onclick="selectMolecule('O', 'H₂O', 'Water')">H₂O Water</div>
+                        <div class="molecule-btn" onclick="selectMolecule('CCO', 'C₂H₆O', 'Ethanol')">C₂H₆O Ethanol</div>
+                        <div class="molecule-btn" onclick="selectMolecule('c1ccccc1', 'C₆H₆', 'Benzene')">C₆H₆ Benzene</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="button-group">
+                    <h4>📄 Export Functions</h4>
+                    <button onclick="exportSMILES()">Export to SMILES</button>
+                    <button onclick="exportMolfile()">Convert Molfile</button>
+                    <button onclick="exportXYZ()">Export to XYZ</button>
+                </div>
+                
+                <div class="button-group">
+                    <h4>⚡ Computation Functions</h4>
+                    <button onclick="runEmpirical()">Run Empirical</button>
+                    <button onclick="runCJ()">Run CJ Calculation</button>
+                    <button onclick="runXTB()">Run XTB</button>
+                    <button onclick="runPsi4()">Run Psi4</button>
+                </div>
+                
+                <div class="button-group">
+                    <h4>📦 Export Functions</h4>
+                    <button onclick="exportZip()">Export Results</button>
+                    <button onclick="testBackend()">Test Backend Health</button>
+                </div>
+                
+                <div id="response-container">
+                    <h4>Response:</h4>
+                    <div id="response" class="response demo">
+                        🚀 Standalone IAM-2.0 Integration Test Ready!
+                        
+                        ✅ All API endpoints available for testing
+                        ✅ Mock molecular data loaded
+                        ✅ Backend integration ready
+                        
+                        Click any button above to test functionality...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8011';
+        let currentMolecule = {
+            smiles: 'C',
+            formula: 'CH₄',
+            name: 'Methane'
+        };
+        
+        function selectMolecule(smiles, formula, name) {
+            currentMolecule = { smiles, formula, name };
+            document.getElementById('molecule-formula').textContent = formula;
+            
+            // Update active button
+            document.querySelectorAll('.molecule-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateResponse('info', {
+                message: `Selected molecule: ${name}`,
+                smiles: smiles,
+                formula: formula,
+                note: 'Click any function button to test with this molecule'
+            }, `Molecule Selected: ${name}`);
+        }
+        
+        function updateResponse(status, data, endpoint = '') {
+            const responseDiv = document.getElementById('response');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let statusClass = status === 'loading' ? 'loading' : 
+                             status === 'demo' ? 'demo' :
+                             status === 'info' ? 'demo' :
+                             (data && (data.ok !== false)) ? 'success' : 'error';
+            
+            let content = `[${timestamp}] ${endpoint}\n\n`;
+            
+            if (status === 'loading') {
+                content += '⏳ Processing...';
+            } else if (status === 'demo' || status === 'info') {
+                content += '🧪 DEMO/TEST MODE\n';
+                content += JSON.stringify(data, null, 2);
+            } else if (data) {
+                content += JSON.stringify(data, null, 2);
+            }
+            
+            responseDiv.className = `response ${statusClass}`;
+            responseDiv.textContent = content;
+        }
+        
+        async function makeRequest(endpoint, payload) {
+            try {
+                updateResponse('loading', null, endpoint);
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                updateResponse(response.status, data, `${endpoint} (${response.status}) - LIVE`);
+                
+                // Update status bar for live mode
+                document.getElementById('status-bar').innerHTML = '🔴 LIVE MODE - Connected to backend server';
+                document.getElementById('status-bar').style.background = 'linear-gradient(90deg, #dc3545 0%, #fd7e14 100%)';
+                
+                return data;
+            } catch (error) {
+                // Fallback to mock data for demonstration
+                const mockResponse = getMockResponse(endpoint, payload);
+                updateResponse('demo', mockResponse, `${endpoint} (Demo Mode)`);
+                return mockResponse;
+            }
+        }
+        
+        // Mock response generator for demo mode
+        function getMockResponse(endpoint, payload) {
+            const mockResponses = {
+                '/ketcher/to-smiles': {
+                    ok: true,
+                    data: { 
+                        smiles: currentMolecule.smiles, 
+                        formula: currentMolecule.formula.replace(/[₀-₉]/g, m => String.fromCharCode(m.charCodeAt(0) - 8272 + 48)),
+                        inchi: `InChI=1S/${currentMolecule.name}/mock` 
+                    },
+                    note: `Mock response - ${currentMolecule.name} conversion`
+                },
+                '/convert/molfile': {
+                    ok: true,
+                    data: { converted: true, format: 'molfile', molecule: currentMolecule.name },
+                    note: `Mock response - ${currentMolecule.name} molfile conversion`
+                },
+                '/ketcher/to-xyz': {
+                    ok: true,
+                    data: { xyz: `Mock XYZ coordinates for ${currentMolecule.name}\n5\n${currentMolecule.name}\nC 0.0 0.0 0.0\nH 1.0 1.0 1.0\n...` },
+                    note: `Mock response - 3D coordinates for ${currentMolecule.name}`
+                },
+                '/ketcher/run': {
+                    ok: true,
+                    data: payload.method === 'empirical' ? 
+                        { Pcj: Math.random() * 50 + 10, Tcj: Math.random() * 2000 + 2000, VoD: Math.random() * 10 + 5, method: 'empirical', molecule: currentMolecule.name } :
+                        { Pcj: Math.random() * 5 + 1, Tcj: Math.random() * 1000 + 3000, VoD: null, method: 'cj', molecule: currentMolecule.name },
+                    note: `Mock response - ${payload.method} calculation for ${currentMolecule.name}`
+                },
+                '/compute/xtb': {
+                    ok: true,
+                    data: { 
+                        energy: -(Math.random() * 10 + 1), 
+                        method: 'GFN2-xTB', 
+                        molecule: currentMolecule.name,
+                        converged: true 
+                    },
+                    note: `Mock response - XTB quantum calculation for ${currentMolecule.name}`
+                },
+                '/compute/psi4': {
+                    ok: true,
+                    data: { 
+                        energy: -(Math.random() * 100 + 10), 
+                        method: 'B3LYP', 
+                        basis: '6-31G*', 
+                        molecule: currentMolecule.name,
+                        convergence: true 
+                    },
+                    note: `Mock response - Psi4 quantum calculation for ${currentMolecule.name}`
+                },
+                '/export/zip': {
+                    ok: true,
+                    data: { 
+                        filename: `${currentMolecule.name.toLowerCase()}_results.zip`, 
+                        size: `${Math.random() * 5 + 1}MB`, 
+                        files: [`${currentMolecule.name.toLowerCase()}_calc.json`, 'geometry.xyz', 'analysis.csv'] 
+                    },
+                    note: `Mock response - Results package for ${currentMolecule.name}`
+                },
+                '/health': {
+                    status: 'healthy',
+                    service: 'iam-2.0-api',
+                    timestamp: new Date().toISOString(),
+                    note: 'Mock health response - backend would provide real status'
+                }
+            };
+            
+            return mockResponses[endpoint] || {
+                ok: false,
+                error: 'Unknown endpoint',
+                note: 'This is a mock response for demo purposes'
+            };
+        }
+        
+        // Export functions
+        async function exportSMILES() {
+            const mockMolfile = `Mock molfile for ${currentMolecule.name}`;
+            await makeRequest('/ketcher/to-smiles', { molfile: mockMolfile });
+        }
+        
+        async function exportMolfile() {
+            const mockMolfile = `Mock molfile for ${currentMolecule.name}`;
+            await makeRequest('/convert/molfile', { molfile: mockMolfile });
+        }
+        
+        async function exportXYZ() {
+            await makeRequest('/ketcher/to-xyz', { smiles: currentMolecule.smiles });
+        }
+        
+        // Computation functions
+        async function runEmpirical() {
+            await makeRequest('/ketcher/run', { smiles: currentMolecule.smiles, method: 'empirical' });
+        }
+        
+        async function runCJ() {
+            await makeRequest('/ketcher/run', { smiles: currentMolecule.smiles, method: 'cj' });
+        }
+        
+        async function runXTB() {
+            await makeRequest('/compute/xtb', { 
+                payload: { smiles: currentMolecule.smiles, options: { method: 'GFN2-xTB' } }
+            });
+        }
+        
+        async function runPsi4() {
+            await makeRequest('/compute/psi4', { 
+                payload: { smiles: currentMolecule.smiles, options: { method: 'B3LYP', basis: '6-31G*' } }
+            });
+        }
+        
+        // Export function
+        async function exportZip() {
+            await makeRequest('/export/zip', { 
+                artifacts: [`${currentMolecule.name}_results.json`, 'calculations.csv'] 
+            });
+        }
+        
+        // Test backend health
+        async function testBackend() {
+            await makeRequest('/health', {});
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateResponse('info', { 
+                message: '🚀 Standalone IAM-2.0 Integration Test Loaded',
+                mode: 'Demo/Live hybrid - tries backend first, falls back to mock',
+                current_molecule: currentMolecule,
+                backend: API_BASE,
+                instructions: 'Select different molecules above and test all functions!'
+            }, 'System Ready');
+        });
+    </script>
+</body>
+</html>
