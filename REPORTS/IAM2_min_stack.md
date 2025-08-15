@@ -40,3 +40,14 @@
 - Updated README.md with repository layout section.
 - Miniconda installer moved to installers/ (not tracked due to .gitignore).
 - All imports and test paths to be updated in next step.
+
+## Step 5 — ZIP Export Endpoint (2025-08-15)
+- Implemented POST /export/zip in iam/backend/routes/export.py with safe path validation and artifact bundling.
+- Wired export router into FastAPI app.
+- Added pytest tests for successful zip creation and path traversal rejection (tests/api/test_export.py).
+- All export endpoint tests pass.
+
+## Step 6 — Examples/Requests Added (2025-08-15)
+- Created examples/requests/ with .http files for convert, ketcher_to_smiles, ketcher_to_xyz, and ketcher_run endpoints.
+- Added examples/README.md with usage instructions for VS Code REST Client and curl.
+- All examples use a small V2000 molfile for methane inline.
