@@ -51,3 +51,33 @@
 - Created examples/requests/ with .http files for convert, ketcher_to_smiles, ketcher_to_xyz, and ketcher_run endpoints.
 - Added examples/README.md with usage instructions for VS Code REST Client and curl.
 - All examples use a small V2000 molfile for methane inline.
+
+## Step 7 — Env-aware Persistence Utilities & Route Wiring (2025-08-15)
+- Updated persistence utilities in iam/backend/utils/persistence.py to respect IAM_RESULTS_BASE env var and ensure Results/Exports subdirs exist.
+- Wired persistence into convert, ketcher run, empirical, and cj routes: only persist on ok=True, and append benchmark rows with Pcj/Tcj/VoD if present.
+- Persistence logic now supports clean testing and success-only writes.
+
+## Step 8 — OpenAPI v1 Spec & Endpoint (2025-08-15)
+## Step 9 — Error Normalization & Envelope (2025-08-15)
+- Refactored all backend routes to return errors using a normalized error envelope:
+	```json
+	{
+		"code": 400,
+		"message": "Invalid input",
+		"details": {},
+		"correlation_id": "uuid"
+	}
+	```
+- Updated fail() helper to delegate to error_envelope, ensuring all errors are wrapped and include a correlation_id.
+- All error responses now use appropriate HTTP status codes (400, 404, 429, 500, etc.).
+- Updated conformance tests to expect correct status codes and validate error envelope shape for error cases.
+- All tests pass; contract compliance is maintained.
+- Documented error envelope and error handling in docs/API.md and added examples for invalid input, file not found, and quota exceeded.
+
+## Step 10 — NOX OpenAPI Spec Integration (2025-08-15)
+- Synced IAM-2.0 OpenAPI spec with NOX integration version.
+- Added endpoints: /compute/xtb, /compute/psi4, /compute/empirical, /compute/cj.
+- Refactored all request schemas to named components (ConvertMolfileRequest, KetcherToXYZRequest, etc.) for clarity and contract alignment.
+- Updated endpoint descriptions and enums to match NOX spec.
+- Updated docs/API.md to reflect new endpoints and schemas, including request/response examples.
+- All changes maintain normalized response and error envelope contract.

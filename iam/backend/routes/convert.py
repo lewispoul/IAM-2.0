@@ -15,13 +15,14 @@ router = APIRouter()
 
 @router.post("/convert/molfile")
 async def convert_molfile(req: MolfileRequest):
+    from fastapi.responses import JSONResponse
     molfile = req.molfile
     if not isinstance(molfile, str) or not (1 < len(molfile) < 2_000_000):
-        return fail(["molfile must be a non-empty string <2MB"])
+        return JSONResponse(fail(["molfile must be a non-empty string <2MB"]), status_code=400)
     try:
         mol = Chem.MolFromMolBlock(molfile, sanitize=True)
         if mol is None:
-            return fail(["Could not parse molfile"])
+            return JSONResponse(fail(["Could not parse molfile"], code=400, details={"field": "molfile"}), status_code=400)
         smiles = Chem.MolToSmiles(mol)
         try:
             from rdkit.Chem import inchi
@@ -30,8 +31,11 @@ async def convert_molfile(req: MolfileRequest):
             inchi_str = None
         formula = rdMolDescriptors.CalcMolFormula(mol)
         result = {"smiles": smiles, "inchi": inchi_str, "formula": formula}
-        if save_result_json:
+        resp = ok(result)
+        if save_result_json and resp["ok"]:
             save_result_json("convert", result)
-        return ok(result)
+            from iam.backend.utils.persistence import append_benchmark_row
+            append_benchmark_row({"name": "convert", "ok": True})
+        return JSONResponse(resp)
     except Exception as e:
-        return fail([str(e)])
+        return JSONResponse(fail([str(e)], code=500), status_code=500)

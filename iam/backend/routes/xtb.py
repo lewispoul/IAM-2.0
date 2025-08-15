@@ -9,10 +9,11 @@ class ComputeRequest(BaseModel):
 
 @router.post("/compute/xtb")
 async def compute_xtb(req: ComputeRequest):
+    from fastapi.responses import JSONResponse
     try:
         # Minimal input check
         if req.payload is None:
-            return fail(["Missing payload"])
-        return ok({"result": "xtb stub", "input": req.payload})
+            return JSONResponse(fail(["Missing payload"], code=400), status_code=400)
+        return JSONResponse(ok({"result": "xtb stub", "input": req.payload}))
     except Exception as e:
-        return fail([str(e)])
+        return JSONResponse(fail([str(e)], code=500), status_code=500)

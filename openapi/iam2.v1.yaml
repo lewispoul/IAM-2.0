@@ -1,0 +1,256 @@
+
+openapi: 3.0.3
+info:
+  title: IAM 2.0 API
+  version: '1.0.0'
+  description: >
+    Versioned IAM 2.0 API consumed by NOX. All responses follow the normalized schema:
+    {"ok": bool, "data": object, "errors": []}.
+servers:
+  - url: http://localhost:8010/v1
+paths:
+  /convert/molfile:
+    post:
+      summary: Convert MOL (V2000/V3000) to descriptors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertMolfileRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /ketcher/to-smiles:
+    post:
+      summary: Convert MOL to SMILES (and return formula/InChI if available)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertMolfileRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /ketcher/to-xyz:
+    post:
+      summary: Generate XYZ (3D) from MOL or SMILES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KetcherToXYZRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /ketcher/run:
+    post:
+      summary: Convert and dispatch a compute job (xtb|psi4|empirical|cj)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KetcherRunRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /compute/xtb:
+    post:
+      summary: XTB compute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeXTBRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /compute/psi4:
+    post:
+      summary: Psi4 compute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputePsi4Request'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /compute/empirical:
+    post:
+      summary: Empirical predictor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeEmpiricalRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /compute/cj:
+    post:
+      summary: CJ predictor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeCJRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+  /export/zip:
+    post:
+      summary: Bundle a list of artifacts into a zip file (safe paths only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportZipRequest'
+      responses:
+        '200':
+          description: Normalized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizedResponse'
+components:
+  schemas:
+    NormalizedResponse:
+      type: object
+      required: [ok, data, errors]
+      properties:
+        ok:
+          type: boolean
+        data:
+          type: object
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+    ConvertMolfileRequest:
+      type: object
+      required: [molfile]
+      properties:
+        molfile:
+          type: string
+          description: MOL V2000/V3000 content
+    KetcherToXYZRequest:
+      type: object
+      properties:
+        molfile:
+          type: string
+        smiles:
+          type: string
+      oneOf:
+        - required: [molfile]
+        - required: [smiles]
+    KetcherRunRequest:
+      type: object
+      properties:
+        molfile:
+          type: string
+        smiles:
+          type: string
+        method:
+          type: string
+          enum: [xtb, psi4, empirical, cj]
+        options:
+          type: object
+    ComputeXTBRequest:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          type: object
+          properties:
+            smiles: { type: string }
+            options: { type: object }
+    ComputePsi4Request:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          type: object
+          properties:
+            smiles: { type: string }
+            options: { type: object }
+    ComputeEmpiricalRequest:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          type: object
+          properties:
+            formula: { type: string }
+            method:
+              type: string
+              enum: [KJ, Keshavarz]
+    ComputeCJRequest:
+      type: object
+      required: [stoich, rho0]
+      properties:
+        stoich:
+          type: object
+          additionalProperties:
+            type: number
+        rho0:
+          type: number
+        dhf:
+          type: number
+          nullable: true
+        metals:
+          type: object
+          additionalProperties:
+            type: number
+          nullable: true
+        species_db:
+          type: string
+          nullable: true
+    ExportZipRequest:
+      type: object
+      required: [artifacts]
+      properties:
+        artifacts:
+          type: array
+          items: { type: string }

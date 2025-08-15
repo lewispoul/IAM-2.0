@@ -13,9 +13,10 @@ from iam.backend.utils.persistence import save_result_json, append_benchmark_row
 
 @router.post("/compute/empirical")
 async def compute_empirical(req: ComputeRequest):
+    from fastapi.responses import JSONResponse
     try:
         if req.payload is None:
-            return fail(["Missing payload"])
+            return JSONResponse(fail(["Missing payload"], code=400), status_code=400)
         result = predict_empirical(req.payload)
         resp = ok(result)
         # Persistence only if ok
@@ -26,6 +27,6 @@ async def compute_empirical(req: ComputeRequest):
                 if k in result:
                     bench[k] = result[k]
             append_benchmark_row(bench)
-        return resp
+        return JSONResponse(resp)
     except Exception as e:
-        return fail([str(e)])
+        return JSONResponse(fail([str(e)], code=500), status_code=500)

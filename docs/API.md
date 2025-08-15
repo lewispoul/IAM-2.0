@@ -1,41 +1,113 @@
 # API.md
 
-> Placeholder for IAM 2.0 API specification.
+IAM 2.0 API Specification
 
-> **Note:** The `iam2` conda environment is set to auto-activate for all new terminal sessions. All API development and testing should be performed in this environment for consistency.
+## Error Envelope (Standard)
 
-## /compute/cj
+All error responses use a normalized envelope:
+
+```json
+{
+  "code": 400,
+  "message": "Invalid input",
+  "details": {},
+  "correlation_id": "uuid"
+}
+```
+
+- `code`: HTTP status code (e.g., 400, 404, 429, 500)
+- `message`: Human-readable error message
+- `details`: Additional error context (e.g., field, engine, quota)
+- `correlation_id`: Unique request ID for UI/debugging
+
+All endpoints return this envelope for errors, with appropriate status codes.
+
+## Endpoints
+
+### /convert/molfile
+- **POST /convert/molfile**
+- Request: `{ "molfile": "..." }`
+- Response: Normalized schema
+
+### /ketcher/to-smiles
+- **POST /ketcher/to-smiles**
+- Request: `{ "molfile": "..." }`
+- Response: Normalized schema
+
+### /ketcher/to-xyz
+- **POST /ketcher/to-xyz**
+- Request: `{ "molfile": "..." }` or `{ "smiles": "..." }`
+- Response: Normalized schema
+
+### /ketcher/run
+- **POST /ketcher/run**
+- Request: `{ "molfile": "...", "smiles": "...", "method": "xtb|psi4|empirical|cj", "options": { ... } }`
+- Response: Normalized schema
+
+### /compute/xtb
+- **POST /compute/xtb**
+- Request: `{ "payload": { "smiles": "...", "options": { ... } } }`
+- Response: Normalized schema
+
+### /compute/psi4
+- **POST /compute/psi4**
+- Request: `{ "payload": { "smiles": "...", "options": { ... } } }`
+- Response: Normalized schema
+
+### /compute/empirical
+- **POST /compute/empirical**
+- Request: `{ "payload": { "formula": "...", "method": "KJ|Keshavarz" } }`
+- Response: Normalized schema
+
+### /compute/cj
 - **POST /compute/cj**
-- Request JSON example:
-  ```json
-  {
-    "stoich": {"H2": 2, "O2": 1},
-    "rho0": 1.6,
-    "dhf": -50.0,
-    "metals": {"Fe": 0.1},
-    "species_db": "default"
-  }
-  ```
-- Normalized response shape:
-  ```json
-  {
-    "ok": true,
-    "data": {
-      "Pcj": 1.23,
-      "Tcj": 3456.0,
-      "VoD": null,
-      "products": [],
-      "artifacts": {"species_db": "default", "input_sum": 3.0, "used_metals": true}
-    },
-    "errors": []
-  }
-  ```
-- On error:
-  ```json
-  {
-    "ok": false,
-    "data": {},
-    "errors": ["error message"]
-  }
-  ```
-- Note: VoD is None in stub; full CJ will be implemented later.
+- Request: `{ "stoich": { ... }, "rho0": ..., "dhf": ..., "metals": { ... }, "species_db": "..." }`
+- Response: Normalized schema
+
+### /export/zip
+- **POST /export/zip**
+- Request: `{ "artifacts": ["path1", "path2", ...] }`
+- Response: Normalized schema
+
+## Request Schemas
+
+- **ConvertMolfileRequest**: `{ "molfile": "..." }`
+- **KetcherToXYZRequest**: `{ "molfile": "..." }` or `{ "smiles": "..." }`
+- **KetcherRunRequest**: `{ "molfile": "...", "smiles": "...", "method": "xtb|psi4|empirical|cj", "options": { ... } }`
+- **ComputeXTBRequest**: `{ "payload": { "smiles": "...", "options": { ... } } }`
+- **ComputePsi4Request**: `{ "payload": { "smiles": "...", "options": { ... } } }`
+- **ComputeEmpiricalRequest**: `{ "payload": { "formula": "...", "method": "KJ|Keshavarz" } }`
+- **ComputeCJRequest**: `{ "stoich": { ... }, "rho0": ..., "dhf": ..., "metals": { ... }, "species_db": "..." }`
+- **ExportZipRequest**: `{ "artifacts": ["path1", "path2", ...] }`
+
+## Error Handling Examples
+
+### Invalid Input
+```json
+{
+  "code": 400,
+  "message": "Invalid SMILES",
+  "details": {"field": "input_data"},
+  "correlation_id": "uuid"
+}
+```
+
+### File Not Found
+```json
+{
+  "code": 404,
+  "message": "File not found: Results/fake.txt",
+  "details": {"field": "Results/fake.txt"},
+  "correlation_id": "uuid"
+}
+```
+
+### Quota Exceeded
+```json
+{
+  "code": 429,
+  "message": "Quota exceeded",
+  "details": {"limit": "MAX_JOBS"},
+  "correlation_id": "uuid"
+}
+```

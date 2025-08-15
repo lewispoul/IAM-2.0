@@ -1,8 +1,11 @@
 from pathlib import Path
 import json, csv, time
-BASE = Path("IAM_Knowledge")
+import os
+BASE = Path(os.environ.get("IAM_RESULTS_BASE", "IAM_Knowledge"))
 RESULTS = BASE / "Results"
-RESULTS.mkdir(parents=True, exist_ok=True)
+EXPORTS = BASE / "Exports"
+for d in (RESULTS, EXPORTS):
+    d.mkdir(parents=True, exist_ok=True)
 
 def save_result_json(name: str, payload: dict) -> str:
     ts = time.strftime("%Y%m%d_%H%M%S")

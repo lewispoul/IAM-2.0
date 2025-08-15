@@ -9,9 +9,10 @@ class ComputeRequest(BaseModel):
 
 @router.post("/compute/psi4")
 async def compute_psi4(req: ComputeRequest):
+    from fastapi.responses import JSONResponse
     try:
         if req.payload is None:
-            return fail(["Missing payload"])
-        return ok({"result": "psi4 stub", "input": req.payload})
+            return JSONResponse(fail(["Missing payload"], code=400), status_code=400)
+        return JSONResponse(ok({"result": "psi4 stub", "input": req.payload}))
     except Exception as e:
-        return fail([str(e)])
+        return JSONResponse(fail([str(e)], code=500), status_code=500)

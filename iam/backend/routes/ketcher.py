@@ -31,18 +31,20 @@ async def ketcher_to_smiles(req: MolfileRequest):
 
 @router.post("/ketcher/to-xyz")
 async def ketcher_to_xyz(req: ToXYZRequest):
+    from fastapi.responses import JSONResponse
     # TODO: Proper 3D embedding, for now placeholder
     xyz = "TODO: 3D coordinates from RDKit"
     result = {"xyz": xyz}
-    return ok(result)
+    return JSONResponse(ok(result))
 
 @router.post("/ketcher/run")
 async def ketcher_run(req: RunRequest):
+    from fastapi.responses import JSONResponse
     smiles = req.smiles
     if req.molfile and not smiles:
         mol = Chem.MolFromMolBlock(req.molfile, sanitize=True)
         if mol is None:
-            return fail(["Could not parse molfile"])
+            return JSONResponse(fail(["Could not parse molfile"], code=400, details={"field": "molfile"}), status_code=400)
         smiles = Chem.MolToSmiles(mol)
     payload = {"smiles": smiles, "options": req.options or {}}
     method = req.method.lower()
@@ -52,25 +54,25 @@ async def ketcher_run(req: RunRequest):
         resp = ok(data)
         if save_result_json and resp["ok"]:
             save_result_json("ketcher_run", resp)
-            bench = {"name": "ketcher_run", "method": method, "ok": True}
+            bench = {"name": "ketcher", "method": method, "ok": True}
             for k in ["Pcj", "Tcj", "VoD"]:
                 if k in data:
                     bench[k] = data[k]
             if append_benchmark_row:
                 append_benchmark_row(bench)
-        return resp
+        return JSONResponse(resp)
     elif method == "cj":
         from iam.runners.cantera_cj import predict_cj
         data = predict_cj(stoich={"H2":2,"O2":1}, rho0=1.6)
         resp = ok(data)
         if save_result_json and resp["ok"]:
             save_result_json("ketcher_run", resp)
-            bench = {"name": "ketcher_run", "method": method, "ok": True}
+            bench = {"name": "ketcher", "method": method, "ok": True}
             for k in ["Pcj", "Tcj", "VoD"]:
                 if k in data:
                     bench[k] = data[k]
             if append_benchmark_row:
                 append_benchmark_row(bench)
-        return resp
+        return JSONResponse(resp)
     else:
-        return fail([f"Method '{method}' not implemented in stub"])
+        return JSONResponse(fail([f"Method '{method}' not implemented in stub"], code=501), status_code=501)
