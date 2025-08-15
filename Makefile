@@ -1,7 +1,7 @@
 .PHONY: env run test lint
 
 # Detect platform python
-PYTHON ?= python
+PYTHON ?= python3
 
 # Create or update local venv if not using conda
 env:
@@ -16,7 +16,7 @@ verify:
 	@$(PYTHON) scripts/verify_env.py || true
 
 run:
-	@echo "Start your backend/UI here. Replace with actual command (e.g., uvicorn app:app --reload)."
+	uvicorn iam.backend.app:app --reload --port 8010
 
 test:
 	@echo "Run unit tests here (e.g., pytest -q)."
