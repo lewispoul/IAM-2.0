@@ -1,0 +1,11 @@
+Feature,IAM source files,Current gaps/bugs,Nox candidates,Migration notes
+Molecule Editor,Ketcher.js,static/script.js,iframe comms sometimes unreliable,api/molecule.py,Integrate Ketcher as a frontend module; connect to nox molecule API
+3D Viewer,static/viewer.js,template/viewer.html,Legacy JS libs,api/viewer.py,Replace with modern JS (e.g. NGL); expose viewer API in nox
+Quantum Chemistry,XTB.py,Psi4.py,backend/calc.py,Limited error handling,api/quantum.py,Wrap XTB/Psi4 hooks as REST endpoints in nox
+Property Prediction,ml_predict.py,static/predict.js,Model version drift,api/predict.py,Port ML model to nox; version and endpoint docs
+File Handling,static/file.js,utils/file_utils.py,Format inconsistencies,api/file.py,Standardize formats (XYZ, SDF, SMILES); use DB/filesystem in nox
+Performance Prediction,static/performance.js,performance.py,Accuracy and speed,api/performance.py,Profile, optimize, and document endpoints
+CJ/Cantera,cantera_demo.py,static/cantera.js,Not full-featured,api/cantera.py,Design simulation API in nox; plan for scalability
+User Dashboard,templates/dashboard.html,static/dashboard.js,Limited filtering,api/user.py,Map user/tasks DB to new backend models
+Authentication,auth.py,static/auth.js,Session bugs,api/auth.py,Use modern auth (JWT/OAuth) in nox
+Logs/History,utils/logging.py,static/logs.js,No audit trail,api/log.py,Add logging, audit, and history endpoints
