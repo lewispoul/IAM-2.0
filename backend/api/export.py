@@ -1,15 +1,19 @@
-"""Export API endpoints for IAM-2.0."""
-
-from fastapi import APIRouter, Body, Query
-from fastapi.responses import StreamingResponse, JSONResponse
-from typing import List, Optional
-from io import StringIO, BytesIO
-import csv, json, zipfile
-import re
+"""
+Export API endpoints for IAM 2.0.
+"""
+from fastapi import APIRouter, Body, HTTPException, Query
+from fastapi.responses import JSONResponse, StreamingResponse
 from pathlib import Path
+from typing import Dict, List, Any
+import json
+import io
+import zipfile
+import csv
+from io import StringIO
+from uuid import uuid4
 
 from backend.api.envelope import ok, err
-from backend.utils.persistence import list_calcs, get_calc, get_results_bulk, get_results_base
+from backend.utils.persistence import get_results_base, list_calcs, get_calc, get_results_bulk
 
 router = APIRouter()
 
@@ -138,8 +142,23 @@ async def export_zip(payload: dict = Body(...)):
     """Export artifacts as ZIP file."""
     artifacts = payload.get("artifacts", [])
     
+    # Handle empty artifacts list by creating empty ZIP
     if not artifacts:
-        return err("Missing or empty 'artifacts' field", 422, {"field": "artifacts"})
+        # Create empty ZIP file
+        zip_filename = f"empty_export_{uuid4().hex[:8]}.zip"
+        zip_path = get_results_base() / zip_filename
+        
+        # Create empty ZIP file
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            # Add a README to explain empty export
+            zipf.writestr("README.txt", "Empty export - no artifacts were selected for export.")
+        
+        return ok({
+            "zip_path": str(zip_path),
+            "filename": zip_filename,
+            "file_count": 0,
+            "note": "Empty export created"
+        })
     
     # Validate artifact paths for security
     missing_files = []
@@ -148,7 +167,7 @@ async def export_zip(payload: dict = Body(...)):
     for artifact in artifacts:
         # Path traversal protection
         if '..' in artifact or artifact.startswith('/') or '\\' in artifact:
-            return err("Path traversal blocked", 400, {"invalid_path": artifact})
+            return err("Invalid path", 400, {"invalid_path": artifact})
         
         # Clean and resolve path
         results_base = get_results_base()
@@ -157,7 +176,7 @@ async def export_zip(payload: dict = Body(...)):
             # Ensure the resolved path is still under results_base
             artifact_path = artifact_path.resolve()
             if not str(artifact_path).startswith(str(results_base.resolve())):
-                return err("Path traversal blocked", 400, {"invalid_path": artifact})
+                return err("Invalid path", 400, {"invalid_path": artifact})
             
             if artifact_path.exists():
                 valid_files.append((artifact, artifact_path))
@@ -168,27 +187,28 @@ async def export_zip(payload: dict = Body(...)):
     
     # If any files are missing, return error
     if missing_files:
-        return err("Missing artifacts", 400, {"missing": missing_files})
+        return err("File not found", 404, {"missing": missing_files})
     
-    # Create ZIP file in memory
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        for artifact_name, artifact_path in valid_files:
+    # Create ZIP file on disk (as test expects)
+    results_base = get_results_base()
+    zip_filename = f"artifacts_{uuid4().hex[:8]}_export.zip"
+    zip_path = results_base / zip_filename
+    
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for artifact_name, artifact_path in sorted(valid_files):  # Sort for consistent order
             # Use safe archive name (relative path)
             safe_name = artifact_name.replace('\\', '/').lstrip('/')
             if artifact_path.is_file():
                 zip_file.write(artifact_path, safe_name)
             elif artifact_path.is_dir():
                 # Add directory and its contents
-                for file_path in artifact_path.rglob('*'):
+                for file_path in sorted(artifact_path.rglob('*')):
                     if file_path.is_file():
                         rel_path = file_path.relative_to(artifact_path.parent)
                         zip_file.write(file_path, str(rel_path).replace('\\', '/'))
     
-    zip_buffer.seek(0)
-    
-    return StreamingResponse(
-        BytesIO(zip_buffer.read()),
-        media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=exports.zip"}
-    )
+    # Return JSON response with zip path
+    return ok({
+        "zip_path": zip_filename,
+        "artifacts": len(valid_files)
+    })

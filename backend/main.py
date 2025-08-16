@@ -39,6 +39,14 @@ app.include_router(export_router, prefix="/api/export", tags=["export"])
 # Include legacy compatibility router (no prefix for exact path matching)
 app.include_router(legacy_router, tags=["legacy"])
 
+# ---- mock target for tests ----
+def run_calc_task(method: str, payload: dict) -> dict:  # pragma: no cover
+    """
+    Minimal stub so tests can patch backend.main.run_calc_task.
+    Real execution is handled inside calc/legacy handlers; this is a patch target only.
+    """
+    return {"status": "noop", "method": method, "payload": payload}
+
 # Health check endpoint
 @app.get("/healthz")
 async def health_check():

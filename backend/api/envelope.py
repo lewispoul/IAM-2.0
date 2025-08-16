@@ -139,7 +139,7 @@ def not_implemented_error(feature: str) -> JSONResponse:
     Returns:
         501 JSONResponse with not implemented error envelope
     """
-    return err(f"Not implemented: {feature}", 501, {"feature": feature})
+    return err("not implemented", 501, {"feature": feature})
 
 
 def internal_error(message: str, error_id: Optional[str] = None) -> JSONResponse:

@@ -3,11 +3,55 @@
 Pytest configuration and fixtures for IAM2.0 testing.
 """
 import os
+import socket
 import pytest
+import http.client
 from unittest.mock import Mock
 from fastapi.testclient import TestClient
 
 from backend.main import app
+
+
+def _port_open(host: str, port: int) -> bool:
+    """Check if a port is open with a quick timeout."""
+    try:
+        with socket.create_connection((host, port), timeout=0.3):
+            return True
+    except OSError:
+        return False
+
+
+def _health_ok() -> bool:
+    """Check if external service on :5000 is healthy."""
+    if not _port_open("127.0.0.1", 5000):
+        return False
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", 5000, timeout=0.3)
+        conn.request("GET", "/healthz")
+        resp = conn.getresponse()
+        return resp.status == 200
+    except Exception:
+        return False
+
+
+def pytest_collection_modifyitems(config, items):
+    """Mark external integration tests and skip if service not available."""
+    require_external = (os.getenv("IAM_E2E") == "1") and _health_ok()
+    
+    # Known external integration test files
+    external_patterns = [
+        "test_molfile_to_xyz.py",
+        "test_psi4_stub.py", 
+        "test_smiles_to_xyz.py",
+        "test_xtb_stub.py"
+    ]
+    
+    for item in items:
+        nid = item.nodeid
+        if any(pattern in nid for pattern in external_patterns):
+            item.add_marker(pytest.mark.external)
+            if not require_external:
+                item.add_marker(pytest.mark.skip(reason="External service not running (set IAM_E2E=1 and start service on :5000)"))
 
 
 @pytest.fixture(scope="session")
