@@ -47,11 +47,16 @@ def run_calc_task(method: str, payload: dict) -> dict:  # pragma: no cover
     """
     return {"status": "noop", "method": method, "payload": payload}
 
-# Health check endpoint
+# Health check endpoints
 @app.get("/healthz")
 async def health_check():
     """Health check endpoint for monitoring."""
-    return {"ok": True}
+    return {"status": "ok"}
+
+@app.get("/api/v1/health")
+async def health_check_legacy():
+    """Legacy health check endpoint for compatibility."""
+    return {"status": "ok"}
 
 # Root endpoint
 @app.get("/")

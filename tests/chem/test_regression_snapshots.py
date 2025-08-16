@@ -1,6 +1,7 @@
 import pytest
 import requests
 
+@pytest.mark.external
 @pytest.mark.parametrize("endpoint, payload, snapshot_name", [
     ("smiles_to_xyz", {"smiles": "C1=CC=CC=C1"}, "xyz_benzene"),
     ("molfile_to_xyz", {"molfile": """

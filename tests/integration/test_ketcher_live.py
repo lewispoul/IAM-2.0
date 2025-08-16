@@ -6,6 +6,7 @@ This script tests the complete integration between the Ketcher UI and backend.
 Run with the backend server running on localhost:8010.
 """
 
+import pytest
 import requests
 import json
 import time
@@ -13,6 +14,7 @@ from datetime import datetime
 
 API_BASE = "http://localhost:8010"
 
+@pytest.mark.external
 def test_endpoint(endpoint, payload, description):
     """Test a single endpoint and print results"""
     print(f"\n🧪 Testing: {description}")

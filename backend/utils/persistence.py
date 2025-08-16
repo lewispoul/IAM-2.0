@@ -8,14 +8,26 @@ import os
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+# Backward compatibility for tests
+BASE = Path.cwd() / "IAM_Knowledge"
+RESULTS = BASE / "Results"
+
 # Dynamic path resolution to respect environment changes
 def get_results_base() -> Path:
     """Get the results base directory from environment or default."""
+    # Use the global BASE if it's been modified (for tests), otherwise use environment
+    global BASE
+    if BASE != Path.cwd() / "IAM_Knowledge":
+        return BASE
     base_path = os.getenv("IAM_RESULTS_BASE", str(Path.cwd() / "IAM_Knowledge"))
     return Path(base_path)
 
 def get_results_dir() -> Path:
     """Get the directory where calc results are stored (directly in base, not a subdirectory)."""
+    # Use the global RESULTS if it's been modified (for tests), otherwise compute
+    global RESULTS
+    if RESULTS != BASE / "Results":
+        return RESULTS
     return get_results_base()
 
 def get_exports_dir() -> Path:

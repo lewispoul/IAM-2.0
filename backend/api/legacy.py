@@ -332,29 +332,41 @@ async def compute_empirical_legacy(payload: dict = Body(...)):
 @router.post("/compute/cj")
 async def compute_cj_legacy(payload: dict = Body(...)):
     """Legacy Chapman-Jouguet computation endpoint."""
+    from fastapi import HTTPException
+    
     stoich = payload.get("stoich")
     rho0 = payload.get("rho0")
     
     if not stoich or not rho0:
-        # Return FastAPI-style validation error to match test expectations
-        from fastapi import HTTPException
         raise HTTPException(
             status_code=422,
             detail=f"Missing required field: {'stoich' if not stoich else 'rho0'}"
         )
     
     if not isinstance(stoich, dict) or not stoich:
-        return validation_error("Invalid stoichiometry - must be non-empty dict", "stoich")
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid stoichiometry - must be non-empty dict"
+        )
     
     if not isinstance(rho0, (int, float)) or rho0 <= 0:
-        return validation_error("Invalid rho0 - must be positive number", "rho0")
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid rho0 - must be positive number"
+        )
     
     # Check for empty species keys or non-positive fractions
     for species, fraction in stoich.items():
         if not species:
-            return validation_error("Empty species key in stoichiometry", "stoich")
+            raise HTTPException(
+                status_code=422,
+                detail="Empty species key in stoichiometry"
+            )
         if not isinstance(fraction, (int, float)) or fraction <= 0:
-            return validation_error(f"Invalid fraction for {species} - must be positive", "stoich")
+            raise HTTPException(
+                status_code=422,
+                detail=f"Invalid fraction for {species} - must be positive"
+            )
     
     # Stub CJ calculation
     stoich_str = str(sorted(stoich.items()))
