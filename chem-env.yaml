@@ -1,34 +1,72 @@
----
 name: iam2
 channels:
   - conda-forge
   - psi4
+  - defaults
 dependencies:
+  # Python and core packages
   - python=3.10
-  - rdkit
-  - psi4
-  - cantera
-  - xtb
+  - pip
+  
+  # Chemistry packages
+  - rdkit>=2023.03.1
+  - psi4>=1.7.0
+  - cantera>=2.6.0
+  - xtb>=6.6.0
   - xtb-python
-  - uvicorn
-  - fastapi
-  - pydantic
-  - pytest
----
-
-name: iam2
-channels:
-  - conda-forge
-  - psi4
-dependencies:
-  - python=3.10
-  - rdkit
-  - psi4
-  - cantera
-  - xtb
-  - xtb-python
-  - uvicorn
-  - fastapi
-  - pydantic
-  - pytest
----
+  - openbabel>=3.1.1
+  
+  # Scientific computing
+  - numpy>=1.24.0
+  - scipy>=1.10.0
+  - matplotlib>=3.6.0
+  - pandas>=1.5.0
+  
+  # Web framework and API
+  - fastapi>=0.95.0
+  - uvicorn[standard]>=0.20.0
+  - pydantic>=1.10.0
+  - httpx>=0.24.0
+  
+  # Database
+  - sqlalchemy>=2.0.0
+  - alembic>=1.10.0
+  - psycopg2>=2.9.0
+  
+  # Async and worker queues
+  - redis-py>=4.5.0
+  - celery>=5.2.0
+  
+  # Development and testing
+  - pytest>=7.2.0
+  - pytest-cov>=4.0.0
+  - pytest-asyncio>=0.21.0
+  - pytest-mock>=3.10.0
+  - black>=23.0.0
+  - ruff>=0.0.250
+  - mypy>=1.0.0
+  - pre-commit>=3.0.0
+  
+  # Jupyter for development
+  - jupyter>=1.0.0
+  - jupyterlab>=3.6.0
+  - ipykernel>=6.20.0
+  
+  # System packages for compilation
+  - gcc_linux-64
+  - gxx_linux-64
+  - make
+  - cmake
+  
+  # Additional packages via pip
+  - pip:
+    - py3Dmol>=2.0.0  # 3D molecular visualization
+    - loguru>=0.7.0  # Enhanced logging
+    - python-multipart>=0.0.6  # File upload support
+    - jinja2>=3.1.0  # Template engine
+    - python-jose[cryptography]>=3.3.0  # JWT tokens
+    - passlib[bcrypt]>=1.7.4  # Password hashing
+    - python-dotenv>=1.0.0  # Environment variables
+    - typer>=0.7.0  # CLI interface
+    - rich>=13.0.0  # Rich console output
+    - watchfiles>=0.18.0  # File watching for development

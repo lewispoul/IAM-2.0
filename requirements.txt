@@ -1,0 +1,57 @@
+# Core web framework
+fastapi>=0.95.0
+uvicorn[standard]>=0.20.0
+pydantic>=1.10.0
+httpx>=0.24.0
+
+# Database
+sqlalchemy>=2.0.0
+alembic>=1.10.0
+psycopg2-binary>=2.9.0
+
+# Async and worker queues
+redis>=4.5.0
+celery>=5.2.0
+
+# Authentication and security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+
+# Utilities
+loguru>=0.7.0
+python-dotenv>=1.0.0
+jinja2>=3.1.0
+typer>=0.7.0
+rich>=13.0.0
+
+# Development tools
+watchfiles>=0.18.0
+python-json-logger>=2.0.0
+
+# Scientific computing (fallbacks if conda fails)
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.6.0
+pandas>=1.5.0
+
+# Molecular visualization
+py3Dmol>=2.0.0
+
+# Testing (for non-conda environments)
+pytest>=7.2.0
+pytest-cov>=4.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+pytest-snapshot>=0.9.0
+
+# Code quality
+black>=23.0.0
+ruff>=0.0.250
+mypy>=1.0.0
+pre-commit>=3.0.0
+
+# Chemistry packages (pip fallbacks)
+# Note: These are better installed via conda when possible
+# rdkit-pypi  # Uncomment if conda rdkit unavailable
+# openbabel   # Uncomment if conda openbabel unavailable

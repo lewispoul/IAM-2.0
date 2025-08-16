@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IAM 2.0 - Integrated Chemistry Platform</title>
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- 3Dmol.js for molecular visualization -->
+    <script src="https://unpkg.com/3dmol@2.0.4/build/3Dmol-min.js"></script>
+    
+    <style>
+        /* Custom styles for IAM2.0 interface */
+        .nav-tabs .nav-link {
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        
+        .ketcher-container {
+            height: 600px;
+            border: 2px solid #dee2e6;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        
+        #ketcher-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .viewer-container {
+            height: 400px;
+            border: 2px solid #dee2e6;
+            border-radius: 0.375rem;
+            background: #f8f9fa;
+        }
+        
+        .results-panel {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .log-panel {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            padding: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-connected { background-color: #28a745; }
+        .status-disconnected { background-color: #dc3545; }
+        .status-working { background-color: #ffc107; }
+        
+        .calculation-card {
+            border-left: 4px solid #0d6efd;
+            transition: box-shadow 0.2s;
+        }
+        
+        .calculation-card:hover {
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+        
+        .progress-ring {
+            width: 20px;
+            height: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .ketcher-container {
+                height: 400px;
+            }
+            .viewer-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-atom"></i> IAM 2.0
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-flask"></i> Chemistry</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-chart-line"></i> Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-history"></i> Results</a>
+                    </li>
+                </ul>
+                <div class="navbar-text">
+                    <span class="status-indicator" id="connectionStatus"></span>
+                    <span id="connectionText">Connecting...</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Column - Input -->
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-pencil-alt"></i> Molecular Editor</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="ketcher-container">
+                            <iframe id="ketcher-iframe" src="/static/ketcher/index.html"></iframe>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary" id="getMolBtn">
+                                <i class="fas fa-download"></i> Get Molecule
+                            </button>
+                            <button type="button" class="btn btn-outline-success" id="convertBtn">
+                                <i class="fas fa-exchange-alt"></i> Convert to XYZ
+                            </button>
+                            <button type="button" class="btn btn-outline-info" id="optimizeBtn">
+                                <i class="fas fa-magic"></i> Optimize
+                            </button>
+                        </div>
+                        <div class="float-end">
+                            <small class="text-muted">
+                                Format: <span id="currentFormat">MOL</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculation Controls -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-calculator"></i> Calculations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-success w-100" id="runXtbBtn">
+                                    <i class="fas fa-play"></i> Run XTB
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-warning w-100" id="runPsi4Btn">
+                                    <i class="fas fa-play"></i> Run Psi4
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <button type="button" class="btn btn-danger w-100" id="runCjBtn">
+                                    <i class="fas fa-fire"></i> Predict CJ Properties
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Calculation Parameters -->
+                        <div class="mt-3">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label">Method</label>
+                                    <select class="form-select form-select-sm" id="methodSelect">
+                                        <option value="gfn2">GFN2-xTB</option>
+                                        <option value="hf">Hartree-Fock</option>
+                                        <option value="b3lyp">B3LYP</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <label class="form-label">Charge</label>
+                                    <input type="number" class="form-control form-control-sm" id="chargeInput" value="0">
+                                </div>
+                                <div class="col-3">
+                                    <label class="form-label">Multiplicity</label>
+                                    <input type="number" class="form-control form-control-sm" id="multInput" value="1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Output -->
+            <div class="col-lg-6">
+                <!-- Tabs for different views -->
+                <ul class="nav nav-tabs" id="outputTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="viewer-tab" data-bs-toggle="tab" data-bs-target="#viewer-pane" role="tab">
+                            <i class="fas fa-cube"></i> 3D Viewer
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results-pane" role="tab">
+                            <i class="fas fa-chart-bar"></i> Results
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance-pane" role="tab">
+                            <i class="fas fa-fire"></i> Performance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-pane" role="tab">
+                            <i class="fas fa-terminal"></i> Logs
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="outputTabContent">
+                    <!-- 3D Viewer Tab -->
+                    <div class="tab-pane fade show active" id="viewer-pane" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-cube"></i> 3D Molecular Viewer
+                                    <div class="float-end">
+                                        <button class="btn btn-sm btn-outline-secondary" id="resetViewBtn">
+                                            <i class="fas fa-undo"></i> Reset View
+                                        </button>
+                                    </div>
+                                </h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="viewer3d" class="viewer-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Tab -->
+                    <div class="tab-pane fade" id="results-pane" role="tabpanel">
+                        <div class="results-panel">
+                            <div id="resultsContent">
+                                <div class="text-center text-muted py-5">
+                                    <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                    <p>Run a calculation to see results</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Tab -->
+                    <div class="tab-pane fade" id="performance-pane" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-fire"></i> Detonation Properties</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="performanceContent">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <label class="form-label">Density (g/cm³)</label>
+                                            <input type="number" class="form-control" id="densityInput" value="1.5" step="0.1" min="0.1" max="5.0">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Temperature (K)</label>
+                                            <input type="number" class="form-control" id="tempInput" value="298.15" step="1" min="200" max="1000">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3" id="cjResults" style="display:none;">
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <div class="card calculation-card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-primary" id="pcjValue">--</h5>
+                                                        <p class="card-text">CJ Pressure (GPa)</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="card calculation-card">
+                                                    <div class="card-body text-center">
+                                                        <h5 class="card-title text-danger" id="vodValue">--</h5>
+                                                        <p class="card-text">Detonation Velocity (m/s)</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs Tab -->
+                    <div class="tab-pane fade" id="logs-pane" role="tabpanel">
+                        <div class="log-panel" id="logOutput">
+                            [INFO] IAM2.0 initialized<br>
+                            [INFO] Ketcher iframe loaded<br>
+                            [INFO] 3D viewer ready<br>
+                            [INFO] Backend connection established<br>
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-secondary" id="clearLogsBtn">
+                                <i class="fas fa-trash"></i> Clear Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // IAM2.0 Main Application JavaScript
+        class IAMApplication {
+            constructor() {
+                this.ketcher = null;
+                this.viewer3d = null;
+                this.currentMolecule = null;
+                this.init();
+            }
+            
+            async init() {
+                this.log('INFO', 'Initializing IAM2.0 Application');
+                this.setupKetcher();
+                this.setup3DViewer();
+                this.bindEvents();
+                this.updateConnectionStatus('connected');
+            }
+            
+            setupKetcher() {
+                const iframe = document.getElementById('ketcher-iframe');
+                iframe.onload = () => {
+                    this.log('INFO', 'Ketcher editor loaded');
+                    // Setup postMessage communication
+                    this.setupKetcherCommunication();
+                };
+            }
+            
+            setupKetcherCommunication() {
+                window.addEventListener('message', (event) => {
+                    if (event.data && event.data.type) {
+                        this.handleKetcherMessage(event.data);
+                    }
+                });
+            }
+            
+            handleKetcherMessage(message) {
+                switch(message.type) {
+                    case 'molfile':
+                        this.currentMolecule = message.molfile;
+                        this.log('INFO', 'Molecule received from Ketcher');
+                        break;
+                    case 'smiles':
+                        this.log('INFO', `SMILES: ${message.smiles}`);
+                        break;
+                }
+            }
+            
+            setup3DViewer() {
+                this.viewer3d = $3Dmol.createViewer('viewer3d', {
+                    defaultcolors: $3Dmol.rasmolElementColors
+                });
+                this.log('INFO', '3D viewer initialized');
+            }
+            
+            bindEvents() {
+                // Molecule operations
+                document.getElementById('getMolBtn').onclick = () => this.getMolecule();
+                document.getElementById('convertBtn').onclick = () => this.convertToXYZ();
+                document.getElementById('optimizeBtn').onclick = () => this.optimizeGeometry();
+                
+                // Calculations
+                document.getElementById('runXtbBtn').onclick = () => this.runCalculation('xtb');
+                document.getElementById('runPsi4Btn').onclick = () => this.runCalculation('psi4');
+                document.getElementById('runCjBtn').onclick = () => this.runCJCalculation();
+                
+                // UI controls
+                document.getElementById('resetViewBtn').onclick = () => this.resetView();
+                document.getElementById('clearLogsBtn').onclick = () => this.clearLogs();
+            }
+            
+            getMolecule() {
+                const iframe = document.getElementById('ketcher-iframe');
+                iframe.contentWindow.postMessage({type: 'get-molfile'}, '*');
+                this.log('INFO', 'Requesting molecule from Ketcher');
+            }
+            
+            async convertToXYZ() {
+                if (!this.currentMolecule) {
+                    this.log('WARN', 'No molecule available. Get molecule first.');
+                    return;
+                }
+                
+                try {
+                    this.log('INFO', 'Converting molecule to XYZ coordinates');
+                    const response = await fetch('/api/convert/molfile-to-xyz', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({molfile: this.currentMolecule})
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.log('INFO', `Conversion successful: ${result.atoms} atoms`);
+                        this.displayXYZ(result.xyz);
+                    } else {
+                        this.log('ERROR', `Conversion failed: ${result.error}`);
+                    }
+                } catch (error) {
+                    this.log('ERROR', `Conversion error: ${error.message}`);
+                }
+            }
+            
+            async runCalculation(type) {
+                if (!this.currentMolecule) {
+                    this.log('WARN', 'No molecule available. Convert to XYZ first.');
+                    return;
+                }
+                
+                try {
+                    this.log('INFO', `Starting ${type.toUpperCase()} calculation`);
+                    const endpoint = type === 'xtb' ? '/api/calc/xtb' : '/api/calc/psi4';
+                    const method = document.getElementById('methodSelect').value;
+                    const charge = parseInt(document.getElementById('chargeInput').value);
+                    const multiplicity = parseInt(document.getElementById('multInput').value);
+                    
+                    // First convert to XYZ if needed
+                    const convertResponse = await fetch('/api/convert/molfile-to-xyz', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({molfile: this.currentMolecule})
+                    });
+                    
+                    const convertResult = await convertResponse.json();
+                    if (!convertResult.success) {
+                        this.log('ERROR', 'Failed to convert molecule for calculation');
+                        return;
+                    }
+                    
+                    const calcResponse = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            xyz: convertResult.xyz,
+                            method: method,
+                            charge: charge,
+                            multiplicity: multiplicity
+                        })
+                    });
+                    
+                    const calcResult = await calcResponse.json();
+                    if (calcResult.success) {
+                        this.log('INFO', `${type.toUpperCase()} calculation completed`);
+                        this.displayResults(calcResult);
+                    } else {
+                        this.log('ERROR', `${type.toUpperCase()} calculation failed: ${calcResult.error}`);
+                    }
+                } catch (error) {
+                    this.log('ERROR', `Calculation error: ${error.message}`);
+                }
+            }
+            
+            async runCJCalculation() {
+                // This would need molecule formula extraction
+                const formula = "C2H4N4O4";  // Example - would extract from molecule
+                const density = parseFloat(document.getElementById('densityInput').value);
+                const temperature = parseFloat(document.getElementById('tempInput').value);
+                
+                try {
+                    this.log('INFO', 'Calculating CJ detonation properties');
+                    const response = await fetch('/api/predict/cj/v1', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            formula: formula,
+                            density: density,
+                            temperature: temperature
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        this.log('INFO', 'CJ calculation completed');
+                        this.displayCJResults(result);
+                    } else {
+                        this.log('ERROR', `CJ calculation failed: ${result.error}`);
+                    }
+                } catch (error) {
+                    this.log('ERROR', `CJ calculation error: ${error.message}`);
+                }
+            }
+            
+            displayXYZ(xyz) {
+                // Display in 3D viewer
+                this.viewer3d.clear();
+                this.viewer3d.addModel(xyz, 'xyz');
+                this.viewer3d.setStyle({}, {stick: {radius: 0.15}, sphere: {scale: 0.3}});
+                this.viewer3d.zoomTo();
+                this.viewer3d.render();
+                
+                // Switch to viewer tab
+                document.getElementById('viewer-tab').click();
+                this.log('INFO', 'Molecule displayed in 3D viewer');
+            }
+            
+            displayResults(results) {
+                const content = document.getElementById('resultsContent');
+                content.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>Calculation Results</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Energy:</strong> ${results.results.energy?.toFixed(6) || 'N/A'} Ha
+                                </div>
+                                <div class="col-6">
+                                    <strong>Method:</strong> ${results.metadata.method || 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Switch to results tab
+                document.getElementById('results-tab').click();
+            }
+            
+            displayCJResults(results) {
+                document.getElementById('pcjValue').textContent = results.pcj?.toFixed(2) || '--';
+                document.getElementById('vodValue').textContent = results.vod?.toFixed(0) || '--';
+                document.getElementById('cjResults').style.display = 'block';
+                
+                // Switch to performance tab
+                document.getElementById('performance-tab').click();
+            }
+            
+            resetView() {
+                if (this.viewer3d) {
+                    this.viewer3d.zoomTo();
+                    this.viewer3d.render();
+                }
+            }
+            
+            updateConnectionStatus(status) {
+                const indicator = document.getElementById('connectionStatus');
+                const text = document.getElementById('connectionText');
+                
+                indicator.className = 'status-indicator status-' + status;
+                switch(status) {
+                    case 'connected':
+                        text.textContent = 'Connected';
+                        break;
+                    case 'disconnected':
+                        text.textContent = 'Disconnected';
+                        break;
+                    case 'working':
+                        text.textContent = 'Processing...';
+                        break;
+                }
+            }
+            
+            log(level, message) {
+                const timestamp = new Date().toISOString().substr(11, 8);
+                const logOutput = document.getElementById('logOutput');
+                logOutput.innerHTML += `[${level}] ${timestamp} - ${message}<br>`;
+                logOutput.scrollTop = logOutput.scrollHeight;
+            }
+            
+            clearLogs() {
+                document.getElementById('logOutput').innerHTML = '';
+            }
+        }
+        
+        // Initialize application when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.iamApp = new IAMApplication();
+        });
+    </script>
+</body>
+</html>

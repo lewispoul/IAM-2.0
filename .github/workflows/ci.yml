@@ -1,0 +1,210 @@
+name: IAM2.0 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Set up Conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        python-version: ${{ matrix.python-version }}
+        environment-file: chem-env.yaml
+        activate-environment: iam2
+    
+    - name: Install dependencies
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-mock
+    
+    - name: Lint with ruff
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pip install ruff
+        ruff check backend/ tests/ --select E9,F63,F7,F82 --show-source --statistics
+    
+    - name: Format check with black
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pip install black
+        black --check backend/ tests/
+    
+    - name: Type check with mypy
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pip install mypy
+        mypy backend/ --ignore-missing-imports || true  # Optional for now
+    
+    - name: Test with pytest
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pytest tests/ -v --cov=backend --cov-report=xml --cov-report=term-missing
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install security tools
+      run: |
+        pip install bandit safety
+    
+    - name: Run Bandit security linter
+      run: |
+        bandit -r backend/ -f json -o bandit-report.json || true
+    
+    - name: Run Safety dependency check
+      run: |
+        safety check --json --output safety-report.json || true
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_USER: testuser
+          POSTGRES_DB: iam2_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        python-version: '3.10'
+        environment-file: chem-env.yaml
+        activate-environment: iam2
+    
+    - name: Install dependencies
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pip install -r requirements.txt
+    
+    - name: Run integration tests
+      shell: bash -l {0}
+      run: |
+        conda activate iam2
+        pytest tests/ -m integration -v
+      env:
+        DATABASE_URL: postgresql://testuser:testpass@localhost:5432/iam2_test
+        PYTHONPATH: ${{ github.workspace }}
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker image
+      run: |
+        docker build -t iam2:test .
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm -d --name iam2-test -p 8000:8000 iam2:test
+        sleep 10
+        curl -f http://localhost:8000/health || exit 1
+        docker stop iam2-test
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [integration, build-docker]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add actual deployment commands here
+    
+    - name: Run smoke tests on staging
+      run: |
+        echo "Running smoke tests on staging..."
+        # Add staging smoke test commands here
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [integration, build-docker]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add actual production deployment commands here
+    
+    - name: Run production health checks
+      run: |
+        echo "Running production health checks..."
+        # Add production health check commands here
