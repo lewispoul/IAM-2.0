@@ -17,6 +17,7 @@ from backend.api.envelope import (
     bad_request_error, not_implemented_error, path_traversal_error
 )
 from backend.converters.rdkit import smiles_to_xyz, molfile_to_xyz
+from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
 from backend.api.calc import XYZRequest, run_xtb, run_psi4
 from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
 
