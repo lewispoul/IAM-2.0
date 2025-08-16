@@ -28,7 +28,6 @@ app.add_middleware(
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="IAM_GUI/static"), name="static")
-app.mount("/public", StaticFiles(directory="public"), name="public")
 
 # Include API routers
 app.include_router(convert.router, prefix="/api/convert", tags=["conversion"])

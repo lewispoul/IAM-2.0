@@ -1,10 +1,180 @@
-<!doctype html>
-<html><head>
-  <meta charset="utf-8" />
-  <title>Ketcher (placeholder)</title>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ketcher - Molecular Editor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Arial, sans-serif;
+        }
+        #ketcher-root { 
+            width: 100%; 
+            height: 100vh; 
+            border: none;
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #666;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 4px;
+            border-left: 4px solid #c62828;
+        }
+    </style>
 </head>
 <body>
-  <h1>Ketcher placeholder</h1>
-  <p>If you see this, the static route works.</p>
-  <script src="./bridge.js"></script>
-</body></html>
+    <div id="loading" class="loading">
+        🧪 Loading Ketcher Molecular Editor...
+    </div>
+    <div id="ketcher-root"></div>
+
+    <script>
+        // Use latest stable Ketcher with proper initialization
+        const KETCHER_VERSION = '2.25.0';
+        
+        // Load CSS dynamically
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `https://unpkg.com/ketcher@${KETCHER_VERSION}/dist/ketcher.css`;
+        document.head.appendChild(link);
+        
+        // Load Ketcher script dynamically
+        const script = document.createElement('script');
+        script.src = `https://unpkg.com/ketcher@${KETCHER_VERSION}/dist/ketcher.js`;
+        script.onload = initializeKetcher;
+        script.onerror = handleLoadError;
+        document.head.appendChild(script);
+        
+        function handleLoadError() {
+            document.getElementById('loading').innerHTML = `
+                <div class="error">
+                    <h3>Failed to load Ketcher</h3>
+                    <p>Could not load Ketcher from CDN. This might be due to:</p>
+                    <ul>
+                        <li>Network connectivity issues</li>
+                        <li>CDN availability problems</li>
+                        <li>Browser security restrictions</li>
+                    </ul>
+                    <p>Try refreshing the page or check your internet connection.</p>
+                </div>
+            `;
+        }
+        
+        function initializeKetcher() {
+            try {
+                document.getElementById('loading').style.display = 'none';
+                
+                if (typeof window.Ketcher === 'undefined') {
+                    throw new Error('Ketcher constructor not found');
+                }
+                
+                // Initialize Ketcher with proper configuration
+                window.ketcher = new window.Ketcher('ketcher-root', {
+                    staticResourcesUrl: `https://unpkg.com/ketcher@${KETCHER_VERSION}/dist/`,
+                    structServiceProvider: {
+                        mode: 'standalone' // Use standalone mode to avoid external service dependencies
+                    }
+                });
+                
+                // Wait for Ketcher to be ready
+                if (window.ketcher && typeof window.ketcher.editor !== 'undefined') {
+                    console.log('✅ Ketcher initialized successfully');
+                    
+                    // Notify parent window that Ketcher is ready
+                    if (window.parent !== window) {
+                        window.parent.postMessage({ type: 'ketcher-ready' }, '*');
+                    }
+                } else {
+                    throw new Error('Ketcher editor not available');
+                }
+                
+            } catch (error) {
+                console.error('❌ Ketcher initialization failed:', error);
+                document.getElementById('ketcher-root').innerHTML = `
+                    <div class="error">
+                        <h3>Ketcher initialization failed</h3>
+                        <p>Error: ${error.message}</p>
+                        <p>Please try refreshing the page.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Bridge functions for parent window communication
+        window.getMolfile = function() {
+            try {
+                if (window.ketcher && window.ketcher.getMolfile) {
+                    return window.ketcher.getMolfile();
+                }
+                return '';
+            } catch (error) {
+                console.error('Error getting molfile:', error);
+                return '';
+            }
+        };
+        
+        window.setMolfile = function(molfile) {
+            try {
+                if (window.ketcher && window.ketcher.setMolfile) {
+                    return window.ketcher.setMolfile(molfile);
+                }
+            } catch (error) {
+                console.error('Error setting molfile:', error);
+            }
+        };
+        
+        window.getSmiles = function() {
+            try {
+                if (window.ketcher && window.ketcher.getSmiles) {
+                    return window.ketcher.getSmiles();
+                }
+                return '';
+            } catch (error) {
+                console.error('Error getting SMILES:', error);
+                return '';
+            }
+        };
+        
+        window.setSmiles = function(smiles) {
+            try {
+                if (window.ketcher && window.ketcher.setSmiles) {
+                    return window.ketcher.setSmiles(smiles);
+                }
+            } catch (error) {
+                console.error('Error setting SMILES:', error);
+            }
+        };
+        
+        window.clear = function() {
+            try {
+                if (window.ketcher && window.ketcher.setMolfile) {
+                    window.ketcher.setMolfile('');
+                }
+            } catch (error) {
+                console.error('Error clearing editor:', error);
+            }
+        };
+        
+        // Debug function to check Ketcher state
+        window.debugKetcher = function() {
+            console.log('Ketcher debug info:', {
+                ketcher: !!window.ketcher,
+                editor: !!window.ketcher?.editor,
+                getMolfile: typeof window.ketcher?.getMolfile,
+                setMolfile: typeof window.ketcher?.setMolfile
+            });
+        };
+    </script>
+</body>
+</html>
