@@ -18,3 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Planned: Psi4 frequency jobs & spectra viewers, ML predictor registry, Gaussian HPC connector
+
+## [2.0.0-alpha] - 2025-08-16
+- FastAPI backend + legacy compatibility layer
+- Export/persistence (CSV/JSON/ZIP) with path-safety
+- Empirical predictors integrated
+- Test harness: 113 passed, 2 skipped (external)
+- Ketcher static served locally

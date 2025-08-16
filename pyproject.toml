@@ -1,6 +1,6 @@
 [project]
 name = "iam2"
-version = "0.0.1"
+version = "2.0.0a0"
 description = "IAM 2.0 – Intelligent Agent for Molecules (clean, modular rebuild)"
 readme = "README.md"
 requires-python = ">=3.10"
