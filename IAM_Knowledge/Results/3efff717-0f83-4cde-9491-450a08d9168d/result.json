@@ -1,0 +1,26 @@
+{
+  "calculation_id": "3efff717-0f83-4cde-9491-450a08d9168d",
+  "xyz": "2\nMethane\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0",
+  "method": "B3LYP",
+  "results": {
+    "energy": -101.97,
+    "energy_units": "hartree",
+    "method": "B3LYP",
+    "converged": true,
+    "optimization_steps": 57,
+    "dipole_moment": {
+      "magnitude": 4.85,
+      "x": 0.9444444444444444,
+      "y": -0.3888888888888889,
+      "z": 0.2777777777777778
+    },
+    "homo_lumo_gap": 0.29700000000000004,
+    "total_charge": 0.0,
+    "multiplicity": 1,
+    "atom_count": 2,
+    "calculation_time": 0.1,
+    "stub": true,
+    "hash_seed": "3ca62bfd"
+  },
+  "timestamp": "2024-01-01T12:00:00"
+}

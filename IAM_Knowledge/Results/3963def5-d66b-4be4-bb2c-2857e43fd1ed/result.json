@@ -1,0 +1,26 @@
+{
+  "calculation_id": "3963def5-d66b-4be4-bb2c-2857e43fd1ed",
+  "xyz": "2\nTest molecule\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0",
+  "method": "gfn2",
+  "results": {
+    "energy": -104.99,
+    "energy_units": "hartree",
+    "method": "gfn2",
+    "converged": true,
+    "optimization_steps": 59,
+    "dipole_moment": {
+      "magnitude": 4.95,
+      "x": -0.1111111111111111,
+      "y": -0.8888888888888888,
+      "z": -0.05555555555555555
+    },
+    "homo_lumo_gap": 0.199,
+    "total_charge": 0.0,
+    "multiplicity": 1,
+    "atom_count": 2,
+    "calculation_time": 0.1,
+    "stub": true,
+    "hash_seed": "4424c93b"
+  },
+  "timestamp": "2024-01-01T12:00:00"
+}

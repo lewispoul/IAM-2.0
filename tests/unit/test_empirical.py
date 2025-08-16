@@ -1,5 +1,5 @@
 import pytest
-from iam.core.empirical.iam_empirical_predictor import predict_kamlet_jacobs, predict_keshavarz, predict_empirical
+from backend.empirical.iam_empirical_predictor import predict_kamlet_jacobs, predict_keshavarz, predict_empirical
 
 @pytest.mark.parametrize("func,payload,expected_keys", [
     (predict_kamlet_jacobs, {"foo": 1}, {"Pcj", "Tcj", "VoD", "input"}),

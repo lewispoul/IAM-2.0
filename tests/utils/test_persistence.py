@@ -1,5 +1,5 @@
 import json
-from iam.backend.utils import persistence
+from backend.utils import persistence
 
 def test_save_result_json(tmp_path):
     payload = {"ok": True, "data": {"foo": 1}, "errors": []}

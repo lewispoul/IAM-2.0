@@ -7,8 +7,8 @@ import os
 import json
 from pathlib import Path
 from fastapi.testclient import TestClient
-from iam.backend.app import app
-from iam.backend.utils.persistence import save_result_json, append_benchmark_row
+from backend.main import app
+from backend.utils.persistence import save_result_json, append_benchmark_row
 
 client = TestClient(app)
 

@@ -57,7 +57,7 @@ def test_run_with_options(client, tmp_results_dir):
     assert "calculation_id" in body["data"]
 
 
-@patch("iam.backend.app.run_calc_task")
+@patch("backend.main.run_calc_task")
 def test_run_internal_task_call(mock_run, client, tmp_results_dir):
     mock_run.return_value = {"calc_id": "test123", "status": "submitted"}
     req = {"xyz": "2\nMethane\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0"}
