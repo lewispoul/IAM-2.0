@@ -10,7 +10,7 @@ import asyncio
 from uuid import uuid4
 
 from ..jobs.xtb_integration import run_xtb_calculation_enhanced, get_xtb_status
-from ..jobs.psi4_stub import run_psi4_calculation
+from ..jobs.psi4_integration import run_psi4_calculation_enhanced, get_psi4_status
 from ..utils.env import flag
 
 logger = logging.getLogger(__name__)
@@ -122,30 +122,57 @@ async def get_xtb_integration_status():
     }
 
 
+@router.get("/psi4/status")
+async def get_psi4_integration_status():
+    """
+    Get current Psi4 integration status and configuration.
+    
+    Returns information about:
+    - Whether Psi4 calculations are enabled via environment flag
+    - Psi4 executable/module availability
+    - Current operating mode (real vs stub)
+    """
+    status_info = get_psi4_status()
+    return {
+        "psi4_integration": status_info,
+        "environment_flags": {
+            "IAM_ENABLE_XTB": flag("IAM_ENABLE_XTB"),
+            "IAM_ENABLE_PSI4": flag("IAM_ENABLE_PSI4")
+        }
+    }
+
+
 @router.post("/psi4", response_model=CalculationResponse)
 async def run_psi4(request: XYZRequest, background_tasks: BackgroundTasks):
     """
     Run Psi4 quantum chemistry calculation.
     
+    Environment flag control:
+    - IAM_ENABLE_PSI4=true: Uses real Psi4 executable/module if available
+    - IAM_ENABLE_PSI4=false (default): Uses deterministic stub implementation
+    
     - **xyz**: Molecule coordinates in XYZ format
-    - **method**: Quantum chemistry method (HF, B3LYP, etc.)
+    - **method**: QM method (HF, B3LYP, MP2, etc.)
     - **charge**: Molecular charge
     - **multiplicity**: Spin multiplicity
     
-    Returns energy, orbitals, and quantum properties.
+    Returns quantum chemistry properties including energy, orbitals, etc.
     """
-    logger.info(f"Starting Psi4 calculation with method: {request.method}")
+    logger.info("Starting Psi4 calculation with method: %s", request.method)
     
     try:
         job_id = str(uuid4())
         
-        # For now, run synchronously (stub implementation)
-        result = await run_psi4_calculation(
+        # Use enhanced Psi4 integration with environment flag support
+        result = await run_psi4_calculation_enhanced(
             xyz=request.xyz,
-            method=request.method or "HF",
+            method=request.method or "HF",  # Default to HF if None
             charge=request.charge,
             multiplicity=request.multiplicity
         )
+        
+        # Add environment flag info to metadata
+        psi4_status = get_psi4_status()
         
         return CalculationResponse(
             success=True,
@@ -153,18 +180,21 @@ async def run_psi4(request: XYZRequest, background_tasks: BackgroundTasks):
             results=result,
             status="completed",
             metadata={
-                "method": request.method or "HF",
+                "method": request.method,
                 "charge": request.charge,
-                "multiplicity": request.multiplicity
+                "multiplicity": request.multiplicity,
+                "psi4_mode": psi4_status["mode"],
+                "psi4_enabled": psi4_status["enabled"],
+                "psi4_implementation": psi4_status["implementation"]
             }
         )
         
     except Exception as e:
-        logger.error(f"Psi4 calculation failed: {e}")
+        logger.error("Psi4 calculation failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Calculation failed: {str(e)}"
-        )
+        ) from e
 
 
 @router.get("/job/{job_id}", response_model=JobStatusResponse)
