@@ -1,6 +1,6 @@
 """
 Calculation API endpoints for IAM2.0.
-Handles chemistry calculations (XTB, Psi4, etc.).
+Handles chemistry calculations (XTB, Psi4, etc.) with environment flag support.
 """
 from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from pydantic import BaseModel, Field
@@ -9,11 +9,19 @@ import logging
 import asyncio
 from uuid import uuid4
 
-from ..jobs.xtb_stub import run_xtb_calculation
-from ..jobs.psi4_stub import run_psi4_calculation
+from backend.jobs.xtb_integration import calculator as xtb_calculator, run_xtb_calculation_enhanced, get_xtb_status
+from backend.jobs.psi4_integration import calculator as psi4_calculator, run_psi4_calculation_enhanced, get_psi4_status
+from backend.jobs.empirical_predictor import empirical_predictor
+from ..utils.env import flag
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/calc", tags=["calculation"])
+
+
+class SMILESRequest(BaseModel):
+    """Request model for SMILES-based calculations."""
+    smiles: str = Field(..., description="SMILES string representation")
+    properties: Optional[list] = Field(None, description="Specific properties to predict")
 
 
 class XYZRequest(BaseModel):
@@ -52,6 +60,10 @@ async def run_xtb(request: XYZRequest, background_tasks: BackgroundTasks):
     """
     Run XTB (extended tight-binding) calculation.
     
+    Environment flag control:
+    - IAM_ENABLE_XTB=true: Uses real XTB executable if available
+    - IAM_ENABLE_XTB=false (default): Uses deterministic stub implementation
+    
     - **xyz**: Molecule coordinates in XYZ format
     - **method**: XTB method (gfn1, gfn2, gfn-ff)
     - **charge**: Molecular charge
@@ -59,18 +71,21 @@ async def run_xtb(request: XYZRequest, background_tasks: BackgroundTasks):
     
     Returns energy, orbitals, and other molecular properties.
     """
-    logger.info(f"Starting XTB calculation with method: {request.method}")
+    logger.info("Starting XTB calculation with method: %s", request.method)
     
     try:
         job_id = str(uuid4())
         
-        # For now, run synchronously (stub implementation)
-        result = await run_xtb_calculation(
+        # Use enhanced XTB integration with environment flag support
+        result = await run_xtb_calculation_enhanced(
             xyz=request.xyz,
-            method=request.method,
+            method=request.method or "gfn2",  # Default to gfn2 if None
             charge=request.charge,
             multiplicity=request.multiplicity
         )
+        
+        # Add environment flag info to metadata
+        xtb_status = get_xtb_status()
         
         return CalculationResponse(
             success=True,
@@ -80,16 +95,58 @@ async def run_xtb(request: XYZRequest, background_tasks: BackgroundTasks):
             metadata={
                 "method": request.method,
                 "charge": request.charge,
-                "multiplicity": request.multiplicity
+                "multiplicity": request.multiplicity,
+                "xtb_mode": xtb_status["mode"],
+                "xtb_enabled": xtb_status["enabled"]
             }
         )
         
     except Exception as e:
-        logger.error(f"XTB calculation failed: {e}")
+        logger.error("XTB calculation failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Calculation failed: {str(e)}"
-        )
+        ) from e
+
+
+@router.get("/xtb/status")
+async def get_xtb_integration_status():
+    """
+    Get current XTB integration status and configuration.
+    
+    Returns information about:
+    - Whether XTB calculations are enabled via environment flag
+    - XTB executable availability
+    - Current operating mode (real vs stub)
+    """
+    status_info = get_xtb_status()
+    return {
+        "xtb_integration": status_info,
+        "environment_flags": {
+            "IAM_ENABLE_XTB": flag("IAM_ENABLE_XTB"),
+            "IAM_ENABLE_PSI4": flag("IAM_ENABLE_PSI4")
+        }
+    }
+
+
+@router.get("/psi4/status")
+async def get_psi4_integration_status():
+    """
+    Get current Psi4 integration status and configuration.
+    
+    Returns information about:
+    - Whether Psi4 calculations are enabled via environment flag
+    - Psi4 executable/module availability
+    - Current operating mode (real vs stub)
+    """
+    status_info = get_psi4_status()
+    return {
+        "psi4_integration": status_info,
+        "environment_flags": {
+            "IAM_ENABLE_XTB": flag("IAM_ENABLE_XTB"),
+            "IAM_ENABLE_PSI4": flag("IAM_ENABLE_PSI4")
+        }
+    }
 
 
 @router.post("/psi4", response_model=CalculationResponse)
@@ -97,25 +154,32 @@ async def run_psi4(request: XYZRequest, background_tasks: BackgroundTasks):
     """
     Run Psi4 quantum chemistry calculation.
     
+    Environment flag control:
+    - IAM_ENABLE_PSI4=true: Uses real Psi4 executable/module if available
+    - IAM_ENABLE_PSI4=false (default): Uses deterministic stub implementation
+    
     - **xyz**: Molecule coordinates in XYZ format
-    - **method**: Quantum chemistry method (HF, B3LYP, etc.)
+    - **method**: QM method (HF, B3LYP, MP2, etc.)
     - **charge**: Molecular charge
     - **multiplicity**: Spin multiplicity
     
-    Returns energy, orbitals, and quantum properties.
+    Returns quantum chemistry properties including energy, orbitals, etc.
     """
-    logger.info(f"Starting Psi4 calculation with method: {request.method}")
+    logger.info("Starting Psi4 calculation with method: %s", request.method)
     
     try:
         job_id = str(uuid4())
         
-        # For now, run synchronously (stub implementation)
-        result = await run_psi4_calculation(
+        # Use enhanced Psi4 integration with environment flag support
+        result = await run_psi4_calculation_enhanced(
             xyz=request.xyz,
-            method=request.method or "HF",
+            method=request.method or "HF",  # Default to HF if None
             charge=request.charge,
             multiplicity=request.multiplicity
         )
+        
+        # Add environment flag info to metadata
+        psi4_status = get_psi4_status()
         
         return CalculationResponse(
             success=True,
@@ -123,18 +187,190 @@ async def run_psi4(request: XYZRequest, background_tasks: BackgroundTasks):
             results=result,
             status="completed",
             metadata={
-                "method": request.method or "HF",
+                "method": request.method,
                 "charge": request.charge,
-                "multiplicity": request.multiplicity
+                "multiplicity": request.multiplicity,
+                "psi4_mode": psi4_status["mode"],
+                "psi4_enabled": psi4_status["enabled"],
+                "psi4_implementation": psi4_status["implementation"]
             }
         )
         
     except Exception as e:
-        logger.error(f"Psi4 calculation failed: {e}")
+        logger.error("Psi4 calculation failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Calculation failed: {str(e)}"
+        ) from e
+
+
+@router.get("/empirical/status")
+async def get_empirical_predictor_status():
+    """
+    Get current empirical predictor status and configuration.
+    
+    Returns information about:
+    - Whether empirical predictions are enabled via environment flag
+    - Available ML models and descriptor calculators
+    - Current operating mode (real vs stub)
+    """
+    status_info = empirical_predictor.get_status()
+    return {
+        "empirical_integration": status_info,
+        "environment_flags": {
+            "IAM_ENABLE_XTB": flag("IAM_ENABLE_XTB"),
+            "IAM_ENABLE_PSI4": flag("IAM_ENABLE_PSI4"),
+            "IAM_ENABLE_EMPIRICAL": flag("IAM_ENABLE_EMPIRICAL")
+        }
+    }
+
+
+@router.post("/empirical/predict", response_model=CalculationResponse)
+async def predict_molecular_properties(request: SMILESRequest, background_tasks: BackgroundTasks):
+    """
+    Predict molecular properties using empirical methods and ML models.
+    
+    Environment flag control:
+    - IAM_ENABLE_EMPIRICAL=true: Uses real ML models and descriptor calculation
+    - IAM_ENABLE_EMPIRICAL=false (default): Uses deterministic stub implementation
+    
+    - **smiles**: SMILES string representation of the molecule
+    - **properties**: List of specific properties to predict (optional)
+    
+    Returns predicted molecular properties with confidence scores.
+    """
+    logger.info("Starting empirical prediction for SMILES: %s", request.smiles)
+    
+    try:
+        job_id = str(uuid4())
+        
+        # Use empirical predictor with environment flag support
+        result = await asyncio.to_thread(
+            empirical_predictor.predict_properties,
+            smiles=request.smiles,
+            properties=request.properties
         )
+        
+        # Add environment flag info to metadata  
+        empirical_status = empirical_predictor.get_status()
+        
+        return CalculationResponse(
+            success=True,
+            job_id=job_id,
+            results=result,
+            status="completed",
+            metadata={
+                "smiles": request.smiles,
+                "properties_requested": request.properties,
+                "empirical_mode": empirical_status["mode"],
+                "empirical_enabled": empirical_status["enabled"],
+                "models_available": empirical_status["models_available"]
+            }
+        )
+        
+    except Exception as e:
+        logger.error("Empirical prediction failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Prediction failed: {str(e)}"
+        ) from e
+
+
+@router.post("/empirical/batch", response_model=CalculationResponse)
+async def batch_predict_molecular_properties(
+    request: Dict[str, Any], 
+    background_tasks: BackgroundTasks
+):
+    """
+    Batch predict molecular properties for multiple SMILES strings.
+    
+    Request format:
+    - **smiles_list**: List of SMILES strings
+    - **properties**: List of properties to predict for each molecule (optional)
+    
+    Returns batch prediction results.
+    """
+    smiles_list = request.get("smiles_list", [])
+    properties = request.get("properties")
+    
+    logger.info("Starting batch empirical prediction for %d molecules", len(smiles_list))
+    
+    try:
+        job_id = str(uuid4())
+        
+        # Use batch prediction with environment flag support
+        results = await asyncio.to_thread(
+            empirical_predictor.batch_predict,
+            smiles_list=smiles_list,
+            properties=properties
+        )
+        
+        # Add environment flag info to metadata
+        empirical_status = empirical_predictor.get_status()
+        
+        return CalculationResponse(
+            success=True,
+            job_id=job_id,
+            results={"batch_results": results, "count": len(results)},
+            status="completed",
+            metadata={
+                "smiles_count": len(smiles_list),
+                "properties_requested": properties,
+                "empirical_mode": empirical_status["mode"],
+                "empirical_enabled": empirical_status["enabled"]
+            }
+        )
+        
+    except Exception as e:
+        logger.error("Batch empirical prediction failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Batch prediction failed: {str(e)}"
+        ) from e
+
+
+@router.post("/empirical/druglikeness", response_model=CalculationResponse)
+async def analyze_drug_likeness(request: SMILESRequest, background_tasks: BackgroundTasks):
+    """
+    Perform comprehensive drug-likeness analysis.
+    
+    - **smiles**: SMILES string representation of the molecule
+    
+    Returns detailed drug-likeness analysis including Lipinski compliance.
+    """
+    logger.info("Starting drug-likeness analysis for SMILES: %s", request.smiles)
+    
+    try:
+        job_id = str(uuid4())
+        
+        # Use drug-likeness analysis with environment flag support
+        result = await asyncio.to_thread(
+            empirical_predictor.analyze_druglikeness,
+            smiles=request.smiles
+        )
+        
+        # Add environment flag info to metadata
+        empirical_status = empirical_predictor.get_status()
+        
+        return CalculationResponse(
+            success=True,
+            job_id=job_id,
+            results=result,
+            status="completed",
+            metadata={
+                "smiles": request.smiles,
+                "analysis_type": "drug_likeness",
+                "empirical_mode": empirical_status["mode"],
+                "empirical_enabled": empirical_status["enabled"]
+            }
+        )
+        
+    except Exception as e:
+        logger.error("Drug-likeness analysis failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Analysis failed: {str(e)}"
+        ) from e
 
 
 @router.get("/job/{job_id}", response_model=JobStatusResponse)
@@ -170,10 +406,14 @@ async def calculation_health():
         "endpoints": [
             "/api/calc/xtb",
             "/api/calc/psi4",
+            "/api/calc/empirical/predict",
+            "/api/calc/empirical/batch",
+            "/api/calc/empirical/druglikeness",
             "/api/calc/job/{job_id}"
         ],
         "methods": {
             "xtb": ["gfn1", "gfn2", "gfn-ff"],
-            "psi4": ["HF", "B3LYP", "MP2", "CCSD"]
+            "psi4": ["HF", "B3LYP", "MP2", "CCSD"],
+            "empirical": ["logP", "molecular_weight", "tpsa", "bioavailability", "drug_likeness", "toxicity_indicators"]
         }
     }
