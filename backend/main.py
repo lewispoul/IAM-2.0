@@ -59,4 +59,4 @@ async def root():
 async def ketcher_shell():
     """Serve ketcher shell HTML directly."""
     from fastapi.responses import FileResponse
-    return FileResponse("public/ketcher.html")
+    return FileResponse("IAM_GUI/templates/ketcher_debug.html")

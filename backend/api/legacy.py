@@ -28,32 +28,45 @@ router = APIRouter()
 async def convert_molfile_legacy(payload: dict = Body(...)):
     """Legacy molfile conversion endpoint."""
     molfile = payload.get("molfile")
-    if not molfile:
+    
+    # Missing field should return 422 for JSON API validation as per test expectations
+    if "molfile" not in payload:
         return validation_error("Missing required field", "molfile")
     
-    if not molfile.strip():
-        return bad_request_error("Empty molfile content")
+    if not isinstance(molfile, str) or len(molfile.strip()) == 0:
+        return bad_request_error("molfile must be a non-empty string")
     
     # Check for oversized payload (>2MB as per test)
     if len(molfile) > 2_000_000:
-        return bad_request_error("Molfile too large", {"size_limit": "2MB"})
-    
-    # Check for valid molfile format
-    if not ("V2000" in molfile or "V3000" in molfile):
-        return bad_request_error("Invalid molfile format", {"expected": "V2000 or V3000 format"})
+        return bad_request_error("molfile must be a non-empty string <2MB")
     
     try:
-        request = MolfileRequest(molfile=molfile)
-        response = await convert_molfile_to_xyz(request)
+        # Use RDKit directly for legacy compatibility
+        from rdkit import Chem
+        from rdkit.Chem import rdMolDescriptors
         
-        if response.success:
-            return ok({
-                "xyz": response.xyz,
-                "atoms": response.atoms,
-                "metadata": response.metadata
-            })
-        else:
-            return bad_request_error(f"Conversion failed: {response.error}")
+        mol = Chem.MolFromMolBlock(molfile, sanitize=True)
+        if mol is None:
+            # Invalid molfile format that can't be parsed returns 400 (matches original)
+            return bad_request_error("Could not parse molfile")
+        
+        smiles = Chem.MolToSmiles(mol)
+        formula = rdMolDescriptors.CalcMolFormula(mol)
+        
+        try:
+            from rdkit.Chem import inchi
+            inchi_str = inchi.MolToInchi(mol)
+        except Exception:
+            inchi_str = None
+        
+        result = {
+            "smiles": smiles, 
+            "formula": formula,
+            "inchi": inchi_str
+        }
+        
+        return ok(result)
+        
     except Exception as e:
         return bad_request_error(f"Conversion error: {str(e)}")
 
@@ -109,24 +122,45 @@ async def molfile_to_xyz_legacy(payload: dict = Body(...)):
 async def ketcher_to_smiles_legacy(payload: dict = Body(...)):
     """Convert molfile to SMILES via ketcher interface."""
     molfile = payload.get("molfile")
-    if not molfile:
+    
+    # Missing field should return 422 for JSON API validation as per edge case tests
+    if "molfile" not in payload:
         return validation_error("Missing required field", "molfile")
     
-    # Check for oversized payload
-    if len(molfile) > 2_000_000:
-        return bad_request_error("Molfile too large", {"size_limit": "2MB"})
+    # Check for oversized payload - return 400 as per edge case tests
+    if molfile and len(molfile) > 2_000_000:
+        return bad_request_error("Molfile too large")
     
-    # Use RDKit converter to validate molfile format
     try:
-        from backend.converters.rdkit import molfile_to_xyz
-        xyz_result = molfile_to_xyz(molfile)
-        if not xyz_result.success:
-            return bad_request_error("Invalid molfile format")
+        # Use RDKit directly like the original convert endpoint
+        from rdkit import Chem
+        from rdkit.Chem import rdMolDescriptors
         
-        # Return placeholder SMILES for valid molfiles
-        return JSONResponse(content=ok({"smiles": "C"}), status_code=200)
-    except Exception:
-        return bad_request_error("Invalid molfile format")
+        mol = Chem.MolFromMolBlock(molfile, sanitize=True)
+        if mol is None:
+            # Invalid molfile format that can't be parsed returns 400 (matches original)
+            return bad_request_error("Could not parse molfile")
+        
+        smiles = Chem.MolToSmiles(mol)
+        formula = rdMolDescriptors.CalcMolFormula(mol)
+        
+        try:
+            from rdkit.Chem import inchi
+            inchi_str = inchi.MolToInchi(mol)
+        except Exception:
+            inchi_str = None
+        
+        result = {
+            "smiles": smiles, 
+            "formula": formula,
+            "inchi": inchi_str
+        }
+        
+        return JSONResponse(content=ok(result), status_code=200)
+        
+    except Exception as e:
+        # Functional conversion errors return 200 with fail envelope
+        return JSONResponse(content=fail([f"Conversion error: {str(e)}"]), status_code=200)
 
 @router.post("/ketcher/to-xyz")
 async def ketcher_to_xyz_legacy(payload: dict = Body(...)):
