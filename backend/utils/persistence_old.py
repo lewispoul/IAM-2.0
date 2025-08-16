@@ -1,3 +1,10 @@
+from pathlib import Path
+import json, csv, time
+import os
+import re
+from typing import Dict, List, Optional, Any
+
+# Honor the IAM_RESULTS_BASE environment variable used by tests
 """Persistence layer for IAM-2.0."""
 
 import json
@@ -15,56 +22,64 @@ def get_results_base() -> Path:
     return Path(base_path)
 
 def get_results_dir() -> Path:
-    """Get the directory where calc results are stored (directly in base, not a subdirectory)."""
-    return get_results_base()
+    """Get the Results subdirectory."""
+    return get_results_base() / "Results"
 
 def get_exports_dir() -> Path:
     """Get the Exports subdirectory."""
     return get_results_base() / "Exports"
+BASE = RESULTS_BASE
+RESULTS = RESULTS_BASE / "Results"
+EXPORTS = RESULTS_BASE / "Exports"
 
 def ensure_base() -> Path:
-    """Create results directories if missing. Return the results base path."""
-    results_dir = get_results_dir()
-    exports_dir = get_exports_dir()
-    results_dir.mkdir(parents=True, exist_ok=True)
-    exports_dir.mkdir(parents=True, exist_ok=True)
-    return get_results_base()
+    """Create RESULTS_BASE if missing. Return the Path."""
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    EXPORTS.mkdir(parents=True, exist_ok=True)
+    return RESULTS_BASE
 
 def calc_dir(calc_id: str) -> Path:
-    """Return Results / calc_id with path traversal protection."""
+    """Return RESULTS_BASE / calc_id with path traversal protection."""
     # Validate calc_id to prevent path traversal
     if not re.match(r'^[A-Za-z0-9._-]+$', calc_id):
         raise ValueError(f"Invalid calc_id: {calc_id}")
     if '..' in calc_id or '/' in calc_id or '\\' in calc_id:
         raise ValueError(f"Path traversal attempt in calc_id: {calc_id}")
     
-    return get_results_dir() / calc_id
+    ensure_base()
+    return RESULTS / calc_id
 
-def get_results_bulk(calc_ids: List[str]) -> List[Dict[str, Any]]:
-    """Return list of {calc_id, data} records for those found; ignore missing."""
+# Legacy compatibility functions
+def save_result(calc_id: str, result_data: Dict[str, Any]) -> str:
+    """Save calculation result by calculation ID (legacy compatibility)."""
+    result_file = save_calc(calc_id, result_data)
+    return str(result_file)
+
+def get_result(calc_id: str) -> Optional[Dict[str, Any]]:
+    """Get calculation result by calculation ID (legacy compatibility)."""
+    return get_calc(calc_id)
+
+def list_results() -> List[Dict[str, Any]]:
+    """List all available calculation results (legacy compatibility)."""
     results = []
+    calc_ids = list_calcs()
     
     for calc_id in calc_ids:
         data = get_calc(calc_id)
         if data is not None:
-            results.append({"calc_id": calc_id, "data": data})
+            results.append(data)
     
     return results
 
 def save_result_json(name: str, payload: dict) -> str:
-    """Save a JSON result with timestamp."""
-    results_dir = get_results_dir()
-    ensure_base()
     ts = time.strftime("%Y%m%d_%H%M%S")
-    fp = results_dir / f"{ts}_{name}.json"
+    fp = RESULTS / f"{ts}_{name}.json"
     fp.write_text(json.dumps(payload, indent=2))
     return str(fp)
 
 def append_benchmark_row(row: dict) -> str:
-    """Append a row to the benchmark CSV file."""
-    base = get_results_base()
-    base.mkdir(parents=True, exist_ok=True)
-    fp = base / "benchmark_auto.csv"
+    BASE.mkdir(parents=True, exist_ok=True)
+    fp = BASE / "benchmark_auto.csv"
     new = not fp.exists()
     with fp.open("a", newline="") as f:
         fieldnames = sorted(row.keys())
@@ -86,11 +101,10 @@ def list_calcs() -> List[str]:
     ensure_base()
     calc_ids = []
     
-    results_dir = get_results_dir()
-    if not results_dir.exists():
+    if not RESULTS.exists():
         return calc_ids
     
-    for calc_directory in results_dir.iterdir():
+    for calc_directory in RESULTS.iterdir():
         if calc_directory.is_dir():
             result_file = calc_directory / "result.json"
             if result_file.exists():
@@ -114,15 +128,13 @@ def get_calc(calc_id: str) -> Optional[Dict[str, Any]]:
         return None
     return None
 
-# Legacy compatibility wrappers
-def save_result(calc_id: str, payload: dict) -> Path:
-    """Legacy wrapper for save_calc."""
-    return save_calc(calc_id, payload)
-
-def get_result(calc_id: str) -> Optional[Dict[str, Any]]:
-    """Legacy wrapper for get_calc."""
-    return get_calc(calc_id)
-
-def list_results() -> List[str]:
-    """Legacy wrapper for list_calcs."""
-    return list_calcs()
+def get_results_bulk(calc_ids: List[str]) -> List[Dict[str, Any]]:
+    """Return list of {calc_id, data} records for those found; ignore missing."""
+    results = []
+    
+    for calc_id in calc_ids:
+        data = get_calc(calc_id)
+        if data is not None:
+            results.append({"calc_id": calc_id, "data": data})
+    
+    return results

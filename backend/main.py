@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.api import convert, calc, predict
 from backend.api.legacy import router as legacy_router
+from backend.api.export import router as export_router
 
 # Create FastAPI application instance
 app = FastAPI(
@@ -33,6 +34,7 @@ app.mount("/static", StaticFiles(directory="IAM_GUI/static"), name="static")
 app.include_router(convert.router, prefix="/api/convert", tags=["conversion"])
 app.include_router(calc.router, prefix="/api/calc", tags=["calculation"])
 app.include_router(predict.router, prefix="/api/predict", tags=["prediction"])
+app.include_router(export_router, prefix="/api/export", tags=["export"])
 
 # Include legacy compatibility router (no prefix for exact path matching)
 app.include_router(legacy_router, tags=["legacy"])

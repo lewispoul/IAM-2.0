@@ -15,8 +15,8 @@ def get_results_base() -> Path:
     return Path(base_path)
 
 def get_results_dir() -> Path:
-    """Get the directory where calc results are stored (directly in base, not a subdirectory)."""
-    return get_results_base()
+    """Get the Results subdirectory."""
+    return get_results_base() / "Results"
 
 def get_exports_dir() -> Path:
     """Get the Exports subdirectory."""

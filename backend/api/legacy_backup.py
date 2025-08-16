@@ -418,6 +418,161 @@ async def run_psi4_legacy(payload: dict = Body(...), background_tasks: Backgroun
             return JSONResponse(content=fail([response.error or "Calculation failed"]), status_code=200)
     except Exception as e:
         return JSONResponse(content=fail([f"Calculation error: {str(e)}"]), status_code=200)
+
+# ---- Legacy export endpoints ----
+
+@router.post("/export/zip")
+async def export_zip_legacy(payload: dict = Body(...)):
+    """Legacy export ZIP endpoint."""
+    artifacts = payload.get("artifacts", [])
+    
+    if not artifacts:
+        return validation_error("Missing 'artifacts' field", "artifacts")
+    
+    # Check for path traversal attempts
+    for artifact in artifacts:
+        if ".." in artifact or artifact.startswith("/"):
+            return path_traversal_error()
+    
+    # Get results directory from environment or use default
+    results_base = os.getenv("IAM_RESULTS_BASE", "IAM_Knowledge/Results")
+    
+    # Check if any artifacts exist
+    existing_artifacts = []
+    for artifact in artifacts:
+        artifact_path = os.path.join(results_base, artifact)
+        if os.path.exists(artifact_path):
+            existing_artifacts.append(artifact)
+    
+    if not existing_artifacts:
+        return not_found_error("artifacts", ", ".join(artifacts))
+    
+    # Create ZIP file
+    with tempfile.NamedTemporaryFile(suffix='.zip', delete=False, dir=results_base) as tmp:
+        zip_path = tmp.name
+    
+    try:
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for artifact in existing_artifacts:
+                artifact_path = os.path.join(results_base, artifact)
+                zipf.write(artifact_path, artifact)
+        
+        # Return relative path from results base
+        rel_zip_path = os.path.relpath(zip_path, results_base)
+        
+        return JSONResponse(content=ok({
+            "zip_path": rel_zip_path,
+            "artifacts_included": existing_artifacts,
+            "total_artifacts": len(existing_artifacts)
+        }), status_code=200)
+    except Exception as e:
+        # Clean up on error
+        if os.path.exists(zip_path):
+            os.unlink(zip_path)
+        return JSONResponse(content=fail([f"ZIP creation failed: {str(e)}"]), status_code=200)
+
+@router.post("/export/csv")
+async def export_csv_legacy(payload: dict = Body(...)):
+    """Export calculation results as CSV."""
+    calculation_ids = payload.get("calculation_ids", [])
+    
+    if not calculation_ids:
+        return validation_error("Missing or empty 'calculation_ids' field", "calculation_ids")
+    
+    results = []
+    missing_ids = []
+    
+    for calc_id in calculation_ids:
+        try:
+            result = get_result(calc_id)
+            if result:
+                results.append(result)
+            else:
+                missing_ids.append(calc_id)
+        except Exception:
+            missing_ids.append(calc_id)
+    
+    if missing_ids:
+        return JSONResponse(content=fail([f"Calculations not found: {', '.join(missing_ids)}"]), status_code=200)
+    
+    # Generate CSV content
+    if results:
+        headers = ["calculation_id"] + list(set().union(*(r.keys() for r in results if isinstance(r, dict))))
+        csv_lines = [",".join(headers)]
+        
+        for result in results:
+            if isinstance(result, dict):
+                row = [str(result.get(h, "")) for h in headers]
+                csv_lines.append(",".join(row))
+        
+        csv_content = "\n".join(csv_lines)
+    else:
+        csv_content = "calculation_id\n"
+    
+    return JSONResponse(content=ok({
+        "csv_content": csv_content,
+        "filename": f"calculations_{len(results)}_results.csv",
+        "total_results": len(results)
+    }), status_code=200)
+
+@router.post("/export/json")
+async def export_json_legacy(payload: dict = Body(...)):
+    """Export calculation results as JSON."""
+    calculation_ids = payload.get("calculation_ids", [])
+    
+    if not calculation_ids:
+        return validation_error("Missing or empty 'calculation_ids' field", "calculation_ids")
+    
+    results = []
+    missing_ids = []
+    
+    for calc_id in calculation_ids:
+        try:
+            result = get_result(calc_id)
+            if result:
+                results.append(result)
+            else:
+                missing_ids.append(calc_id)
+        except Exception:
+            missing_ids.append(calc_id)
+    
+    if missing_ids:
+        return JSONResponse(content=fail([f"Calculations not found: {', '.join(missing_ids)}"]), status_code=200)
+    
+    json_content = json.dumps(results, indent=2)
+    
+    return JSONResponse(content=ok({
+        "json_content": json_content,
+        "filename": f"calculations_{len(results)}_results.json",
+        "total_results": len(results)
+    }), status_code=200)
+
+@router.get("/calculations/")
+async def list_calculations_legacy():
+    """List all available calculations."""
+    try:
+        calculations = list_results()
+        return JSONResponse(content=ok({
+            "calculations": calculations,
+            "total_count": len(calculations)
+        }), status_code=200)
+    except Exception as e:
+        return JSONResponse(content=fail([f"Failed to list calculations: {str(e)}"]), status_code=200)
+
+@router.get("/calculations/{calc_id}")
+async def get_calculation_details_legacy(calc_id: str):
+    """Get details for a specific calculation."""
+    try:
+        result = get_result(calc_id)
+        if result:
+            return JSONResponse(content=ok({
+                "calculation": result
+            }), status_code=200)
+        else:
+            return JSONResponse(content=fail([f"Calculation not found: {calc_id}"]), status_code=200)
+    except Exception as e:
+        return JSONResponse(content=fail([f"Failed to get calculation details: {str(e)}"]), status_code=200)
+
 # ---- Legacy run endpoint ----
 
 @router.post("/run/")
@@ -508,16 +663,3 @@ async def export_zip_legacy(payload: dict = Body(...)):
     """Legacy export ZIP endpoint - forward to new API."""
     from backend.api.export import export_zip
     return await export_zip(payload)
-
-# Legacy calculation list endpoints
-@router.get("/calculations/")
-async def list_calculations_legacy():
-    """Legacy calculation list endpoint - forward to export API."""
-    from backend.api.export import list_calculations
-    return await list_calculations()
-
-@router.get("/calculations/{calc_id}")
-async def get_calculation_details_legacy(calc_id: str):
-    """Legacy calculation details endpoint - forward to export API."""
-    from backend.api.export import get_calculation_details
-    return await get_calculation_details(calc_id)
