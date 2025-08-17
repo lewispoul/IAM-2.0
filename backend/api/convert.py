@@ -1,109 +1,122 @@
 """
-Conversion API endpoints for IAM2.0.
-Handles molecular format conversions (SMILES, MOL → XYZ).
+FastAPI conversion endpoints for IAM2.0.
+Provides modern REST API for molecular format conversion.
 """
-from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
-from typing import Optional
-import logging
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Dict, Any, Optional
 
-from ..converters.rdkit import smiles_to_xyz, molfile_to_xyz
+from ..converters.rdkit import smiles_to_xyz, molfile_to_xyz, smiles_to_pdb
 
-logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/api/convert", tags=["conversion"])
+router = APIRouter()
 
 
-class SmilesRequest(BaseModel):
-    """Request model for SMILES to XYZ conversion."""
-    smiles: str = Field(..., description="SMILES string to convert")
-    optimize: bool = Field(True, description="Apply force field optimization")
+class ConvertSMILESRequest(BaseModel):
+    """Request model for SMILES conversion."""
+    smiles: str
+    optimize: bool = True
 
 
-class MolfileRequest(BaseModel):
-    """Request model for MOL file to XYZ conversion."""
-    molfile: str = Field(..., description="MOL file content")
+class ConvertMOLRequest(BaseModel):
+    """Request model for MOL file conversion."""
+    molfile: str
 
 
-class ConversionResponse(BaseModel):
+class ConvertSMILESToPDBRequest(BaseModel):
+    """Request model for SMILES to PDB conversion."""
+    smiles: str
+    optimize: bool = True
+    title: Optional[str] = "IAM2.0 Generated"
+
+
+class ConvertResponse(BaseModel):
     """Response model for conversion operations."""
     success: bool
     xyz: Optional[str] = None
     atoms: Optional[int] = None
     error: Optional[str] = None
-    metadata: dict = {}
+    metadata: Dict[str, Any] = {}
 
 
-@router.post("/smiles-to-xyz", response_model=ConversionResponse)
-async def convert_smiles_to_xyz(request: SmilesRequest):
+@router.post("/smiles-to-xyz", response_model=ConvertResponse)
+async def convert_smiles_to_xyz(request: ConvertSMILESRequest):
     """
     Convert SMILES string to XYZ coordinates.
     
-    - **smiles**: SMILES representation of the molecule
-    - **optimize**: Whether to optimize geometry (default: true)
-    
-    Returns XYZ coordinates with atom count and metadata.
+    Args:
+        request: SMILES conversion request
+        
+    Returns:
+        ConvertResponse with XYZ coordinates or error
     """
-    logger.info(f"Converting SMILES to XYZ: {request.smiles[:50]}...")
-    
     try:
         result = smiles_to_xyz(request.smiles, request.optimize)
         
-        return ConversionResponse(
+        if not result.success:
+            raise HTTPException(status_code=400, detail=result.error)
+        
+        return ConvertResponse(
             success=result.success,
             xyz=result.xyz,
             atoms=result.atoms,
-            error=result.error,
-            metadata=result.metadata or {}
+            metadata=result.metadata
         )
         
     except Exception as e:
-        logger.error(f"SMILES conversion failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Conversion failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/molfile-to-xyz", response_model=ConversionResponse)
-async def convert_molfile_to_xyz(request: MolfileRequest):
+@router.post("/mol-to-xyz", response_model=ConvertResponse)
+async def convert_mol_to_xyz(request: ConvertMOLRequest):
     """
     Convert MOL file content to XYZ coordinates.
     
-    - **molfile**: Complete MOL file content as string
-    
-    Returns XYZ coordinates with atom count and metadata.
+    Args:
+        request: MOL file conversion request
+        
+    Returns:
+        ConvertResponse with XYZ coordinates or error
     """
-    logger.info("Converting MOL file to XYZ...")
-    
     try:
         result = molfile_to_xyz(request.molfile)
         
-        return ConversionResponse(
+        if not result.success:
+            raise HTTPException(status_code=400, detail=result.error)
+        
+        return ConvertResponse(
             success=result.success,
             xyz=result.xyz,
             atoms=result.atoms,
-            error=result.error,
-            metadata=result.metadata or {}
+            metadata=result.metadata
         )
         
     except Exception as e:
-        logger.error(f"MOL file conversion failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Conversion failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/health")
-async def conversion_health():
-    """Health check for conversion services."""
-    from ..converters.rdkit import converter
+@router.post("/smiles-to-pdb", response_model=ConvertResponse)
+async def convert_smiles_to_pdb(request: ConvertSMILESToPDBRequest):
+    """
+    Convert SMILES string to PDB format.
     
-    return {
-        "status": "ok",
-        "rdkit_available": converter.available,
-        "endpoints": [
-            "/api/convert/smiles-to-xyz",
-            "/api/convert/molfile-to-xyz"
-        ]
-    }
+    Args:
+        request: SMILES to PDB conversion request
+        
+    Returns:
+        ConvertResponse with PDB content or error
+    """
+    try:
+        result = smiles_to_pdb(request.smiles, request.optimize, request.title or "IAM2.0 Generated")
+        
+        if not result.success:
+            raise HTTPException(status_code=400, detail=result.error)
+        
+        return ConvertResponse(
+            success=result.success,
+            xyz=result.xyz,  # Contains PDB content
+            atoms=result.atoms,
+            metadata=result.metadata
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

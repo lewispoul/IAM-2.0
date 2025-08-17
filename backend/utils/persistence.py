@@ -8,19 +8,27 @@ import os
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+from .env import results_base, exports_base
+
 # Backward compatibility for tests
 BASE = Path.cwd() / "IAM_Knowledge"
 RESULTS = BASE / "Results"
 
-# Dynamic path resolution to respect environment changes
 def get_results_base() -> Path:
     """Get the results base directory from environment or default."""
-    # Use the global BASE if it's been modified (for tests), otherwise use environment
+    # Use the global BASE if it's been modified (for tests), otherwise use env helper
     global BASE
     if BASE != Path.cwd() / "IAM_Knowledge":
         return BASE
-    base_path = os.getenv("IAM_RESULTS_BASE", str(Path.cwd() / "IAM_Knowledge"))
-    return Path(base_path)
+    path = results_base()
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+def get_exports_base() -> Path:
+    """Get the exports base directory from environment or default."""
+    path = exports_base()
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 def get_results_dir() -> Path:
     """Get the directory where calc results are stored (directly in base, not a subdirectory)."""
@@ -32,10 +40,10 @@ def get_results_dir() -> Path:
 
 def get_exports_dir() -> Path:
     """Get the Exports subdirectory."""
-    return get_results_base() / "Exports"
+    return get_exports_base()
 
 def ensure_base() -> Path:
-    """Create results directories if missing. Return the results base path."""
+    """Create results and exports directories if missing. Return the results base path."""
     results_dir = get_results_dir()
     exports_dir = get_exports_dir()
     results_dir.mkdir(parents=True, exist_ok=True)

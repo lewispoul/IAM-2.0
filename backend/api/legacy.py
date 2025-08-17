@@ -16,7 +16,8 @@ from backend.api.envelope import (
     ok, fail, err, validation_error, not_found_error, 
     bad_request_error, not_implemented_error, path_traversal_error
 )
-from backend.api.convert import SmilesRequest, MolfileRequest, convert_smiles_to_xyz, convert_molfile_to_xyz
+from backend.converters.rdkit import smiles_to_xyz, molfile_to_xyz
+from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
 from backend.api.calc import XYZRequest, run_xtb, run_psi4
 from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
 
@@ -78,18 +79,18 @@ async def smiles_to_xyz_legacy(payload: dict = Body(...)):
         return validation_error("Missing required field", "smiles")
     
     try:
-        request = SmilesRequest(smiles=smiles, optimize=payload.get("optimize", True))
-        response = await convert_smiles_to_xyz(request)
+        # Use RDKit converter directly
+        result = smiles_to_xyz(smiles, optimize=payload.get("optimize", True))
         
-        if response.success:
+        if result.success:
             return ok({
                 "success": True,
-                "xyz": response.xyz,
-                "atoms": response.atoms,
-                "metadata": response.metadata
+                "xyz": result.xyz,
+                "atoms": result.atoms,
+                "metadata": result.metadata
             })
         else:
-            return JSONResponse(content=fail([f"Conversion failed: {response.error}"]), status_code=200)
+            return JSONResponse(content=fail([f"Conversion failed: {result.error}"]), status_code=200)
     except Exception as e:
         return JSONResponse(content=fail([f"Conversion error: {str(e)}"]), status_code=200)
 
@@ -101,18 +102,18 @@ async def molfile_to_xyz_legacy(payload: dict = Body(...)):
         return validation_error("Missing required field", "molfile")
     
     try:
-        request = MolfileRequest(molfile=molfile)
-        response = await convert_molfile_to_xyz(request)
+        # Use RDKit converter directly
+        result = molfile_to_xyz(molfile)
         
-        if response.success:
+        if result.success:
             return ok({
                 "success": True,
-                "xyz": response.xyz,
-                "atoms": response.atoms,
-                "metadata": response.metadata
+                "xyz": result.xyz,
+                "atoms": result.atoms,
+                "metadata": result.metadata
             })
         else:
-            return JSONResponse(content=fail([f"Conversion failed: {response.error}"]), status_code=200)
+            return JSONResponse(content=fail([f"Conversion failed: {result.error}"]), status_code=200)
     except Exception as e:
         return JSONResponse(content=fail([f"Conversion error: {str(e)}"]), status_code=200)
 
@@ -164,7 +165,7 @@ async def ketcher_to_smiles_legacy(payload: dict = Body(...)):
 
 @router.post("/ketcher/to-xyz")
 async def ketcher_to_xyz_legacy(payload: dict = Body(...)):
-    """Convert SMILES to XYZ via ketcher interface."""
+    """Convert SMILES to XYZ via ketcher interface - enhanced with RDKit integration."""
     smiles = payload.get("smiles")
     if not smiles:
         return validation_error("Missing required field", "smiles")
@@ -177,12 +178,29 @@ async def ketcher_to_xyz_legacy(payload: dict = Body(...)):
     if smiles.lower() in ['not_a_smiles']:
         return JSONResponse(content=fail(["Invalid SMILES format"]), status_code=200)
     
-    # Return placeholder for valid-looking SMILES
-    return JSONResponse(content=ok({
-        "xyz": "TODO: 3D coordinates",
-        "atoms": [],
-        "metadata": {"stub": True, "smiles": smiles}
-    }), status_code=200)
+    try:
+        # Use RDKit converter for actual SMILES to XYZ conversion
+        from backend.converters.rdkit import smiles_to_xyz
+        
+        result = smiles_to_xyz(smiles, optimize=True)
+        
+        if result.success:
+            return JSONResponse(content=ok({
+                "xyz": result.xyz,
+                "atoms": result.atoms,
+                "metadata": result.metadata
+            }), status_code=200)
+        else:
+            # Return error as failure envelope
+            return JSONResponse(content=fail([f"Conversion failed: {result.error}"]), status_code=200)
+            
+    except Exception as e:
+        # Fallback to placeholder for any conversion errors
+        return JSONResponse(content=ok({
+            "xyz": "TODO: 3D coordinates",
+            "atoms": [],
+            "metadata": {"stub": True, "smiles": smiles}
+        }), status_code=200)
 
 @router.post("/ketcher/run")
 async def ketcher_run_legacy(payload: dict = Body(...), background_tasks: BackgroundTasks = BackgroundTasks()):
@@ -218,16 +236,15 @@ async def ketcher_run_legacy(payload: dict = Body(...), background_tasks: Backgr
         }), status_code=200)
     
     try:
-        # Convert SMILES to XYZ first
-        request = SmilesRequest(smiles=smiles, optimize=True)
-        conv_response = await convert_smiles_to_xyz(request)
+        # Convert SMILES to XYZ first using RDKit converter directly
+        result = smiles_to_xyz(smiles, optimize=True)
         
-        if not conv_response.success or not conv_response.xyz:
-            return JSONResponse(content=fail([f"Conversion failed: {conv_response.error}"]), status_code=200)
+        if not result.success or not result.xyz:
+            return JSONResponse(content=fail([f"Conversion failed: {result.error}"]), status_code=200)
         
         # Run calculation based on method
         if method in ["xtb", "gfn2"]:
-            calc_request = XYZRequest(xyz=conv_response.xyz, method="gfn2", charge=0, multiplicity=1)
+            calc_request = XYZRequest(xyz=result.xyz, method="gfn2", charge=0, multiplicity=1)
             calc_response = await run_xtb(calc_request, background_tasks)
         else:
             return not_implemented_error(f"Method '{method}'")
@@ -236,7 +253,7 @@ async def ketcher_run_legacy(payload: dict = Body(...), background_tasks: Backgr
             return JSONResponse(content=ok({
                 "method": method,
                 "smiles": smiles,
-                "results": calc_response.results,
+                "results": calc_response.results or {},
                 "job_id": calc_response.job_id
             }), status_code=200)
         else:
@@ -258,19 +275,18 @@ async def compute_xtb_legacy(payload: dict = Body(...), background_tasks: Backgr
         return JSONResponse(content=fail(["Missing 'smiles' in payload"]), status_code=200)
     
     try:
-        # Convert SMILES to XYZ first
-        request = SmilesRequest(smiles=smiles, optimize=True)
-        conv_response = await convert_smiles_to_xyz(request)
+        # Convert SMILES to XYZ first using RDKit converter directly
+        result = smiles_to_xyz(smiles, optimize=True)
         
-        if not conv_response.success or not conv_response.xyz:
-            return bad_request_error(f"Conversion failed: {conv_response.error}")
+        if not result.success or not result.xyz:
+            return bad_request_error(f"Conversion failed: {result.error}")
         
         # Run XTB calculation
-        calc_request = XYZRequest(xyz=conv_response.xyz, method="gfn2", charge=0, multiplicity=1)
+        calc_request = XYZRequest(xyz=result.xyz, method="gfn2", charge=0, multiplicity=1)
         calc_response = await run_xtb(calc_request, background_tasks)
         
         if calc_response.success:
-            return JSONResponse(content=ok(calc_response.results), status_code=200)
+            return JSONResponse(content=ok(calc_response.results or {}), status_code=200)
         else:
             return JSONResponse(content=fail([calc_response.error or "Calculation failed"]), status_code=200)
     except Exception as e:
@@ -288,19 +304,18 @@ async def compute_psi4_legacy(payload: dict = Body(...), background_tasks: Backg
         return JSONResponse(content=fail(["Missing 'smiles' in payload"]), status_code=200)
     
     try:
-        # Convert SMILES to XYZ first
-        request = SmilesRequest(smiles=smiles, optimize=True)
-        conv_response = await convert_smiles_to_xyz(request)
+        # Convert SMILES to XYZ first using RDKit converter directly
+        result = smiles_to_xyz(smiles, optimize=True)
         
-        if not conv_response.success or not conv_response.xyz:
-            return bad_request_error(f"Conversion failed: {conv_response.error}")
+        if not result.success or not result.xyz:
+            return bad_request_error(f"Conversion failed: {result.error}")
         
         # Run Psi4 calculation
-        calc_request = XYZRequest(xyz=conv_response.xyz, method="HF", charge=0, multiplicity=1)
+        calc_request = XYZRequest(xyz=result.xyz, method="HF", charge=0, multiplicity=1)
         calc_response = await run_psi4(calc_request, background_tasks)
         
         if calc_response.success:
-            return JSONResponse(content=ok(calc_response.results), status_code=200)
+            return JSONResponse(content=ok(calc_response.results or {}), status_code=200)
         else:
             return JSONResponse(content=fail([calc_response.error or "Calculation failed"]), status_code=200)
     except Exception as e:

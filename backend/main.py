@@ -32,7 +32,7 @@ app.mount("/static", StaticFiles(directory="IAM_GUI/static"), name="static")
 
 # Include API routers
 app.include_router(convert.router, prefix="/api/convert", tags=["conversion"])
-app.include_router(calc.router, prefix="/api/calc", tags=["calculation"])
+app.include_router(calc.router, tags=["calculation"])  # calc.router already has prefix="/api/calc"
 app.include_router(predict.router, prefix="/api/predict", tags=["prediction"])
 app.include_router(export_router, prefix="/api/export", tags=["export"])
 
