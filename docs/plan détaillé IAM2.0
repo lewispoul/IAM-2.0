@@ -1,0 +1,319 @@
+# Plans détaillés IAM2.0, Nox et Unification (version 2025‑08‑17)
+
+## Résumé exécutif
+
+Objectif, livrer une plateforme unifiée pour la chimie computationnelle et la prédiction de performance des matériaux énergétiques. IAM2.0 fournit l’interface, l’expérience utilisateur et les outils orientés chimiste. Nox fournit le cœur API, l’orchestration des calculs, la mémoire procédurale, la gestion des données et l’automatisation. L’unification s’effectue par un contrat d’API unique, des modèles de données communs et des runners standardisés pour les moteurs XTB, Psi4, Gaussian et le module Cantera CJ.
+
+---
+
+## Principes directeurs
+
+1. Séparer strictement interface et calculs, IAM2.0 consomme les API Nox.
+2. API d’abord, toutes les fonctions calcul sont exposées par Nox via un schéma OpenAPI avec modèles Pydantic versionnés.
+3. Design pour la reproductibilité, chaque calcul génère des artefacts versionnés, traçables et rejouables.
+4. Robustesse, tests systématiques, CI sur GitHub Actions, vérification fonctionnelle par jeux d’exemples de référence.
+5. Compatibilité locale et distante, même API pour Raspberry Pi, laptop et cluster distant.
+6. Migration progressive, zéro interruption de l’interface IAM existante, bascule progressive des fonctions backend vers Nox.
+
+---
+
+## Partie A — Plan de projet IAM2.0
+
+### A1. Objectifs fonctionnels
+
+* Visualisation moléculaire 3D fiable (3Dmol.js), sketcher intégré (Ketcher), conversion SMILES et MOL vers XYZ.
+* Lancement de calculs QM légers et moyens, XTB en priorité, Psi4 en option, retour d’un résumé clair (énergie, gap, dipôle, charges, fréquences si demandées).
+* Visualisation des orbitales HOMO et LUMO via fichiers .cube, rendu dans 3Dmol.js, génération automatique depuis XTB ou Psi4.
+* Prédictions de performance, onglet dédié avec Kamlet–Jacobs, Keshavarz empirique et modèle ML, affichage VoD, Pcj, ΔHdet, Isp, incertitudes si disponibles.
+* Fiches moléculaires IAM\_Knowledge synchronisées, export JSON et CSV, traçabilité des sources.
+
+### A2. Architecture cible IAM2.0
+
+* **Frontend**
+
+  * Phase 1, consolider Flask + Jinja2 + HTMX pour stabilité, composants UI modernes, onglets Résumé, Output, Log, Performance.
+  * Phase 2, front React avec Vite et shadcn/ui, 3Dmol.js, intégration Ketcher en iframe, appels API Nox via fetch avec Y.js pour états collaboratifs si requis.
+* **Backend transitoire**
+
+  * Garder un backend Flask minimal uniquement pour servir les pages et relayer vers Nox pendant la migration, aucune logique calcul dans IAM2.0 à terme.
+* **Contrat de données**
+
+  * Schémas JSON communs, MoleculeInput, JobRequest, JobStatus, Artifact, ResultBundle.
+
+### A3. Modules IAM2.0
+
+1. **Viewer 3D et Sketcher**, Ketcher 3.4 intégré en iframe, pont postMessage pour exporter MOL, convertisseur MOL vers XYZ, contrôle charge et multiplicité.
+2. **Convertisseurs**
+
+   * SMILES vers 3D XYZ via RDKit et ETKDG, vérification validate\_xyz, correction des formats V2000 et V3000.
+3. **Lanceur de calculs**
+
+   * Formulaire de paramètres XTB (gfn 0, 1, 2, opt, hess, uhf, chrg, json), envoi à Nox, suivi de progression via SSE.
+4. **Orbitales et spectroscopies**
+
+   * Génération .cube pour HOMO et LUMO, rendu 3D, IR à partir de fréquences, graphiques Matplotlib embarqués en PNG, table de transitions UV‑Vis si disponibles.
+5. **Performance**
+
+   * VoD, Pcj, ΔHdet, Isp, KJ et Keshavarz, modèle ML maison, bouton « Envoyer au module Cantera CJ ».
+6. **Données**
+
+   * IAM\_Knowledge, chargement et mise à jour, export CSV et JSON, lien vers sources.
+
+### A4. Qualité, tests et CI IAM2.0
+
+* **Tests**, pytest côté Python, Playwright côté UI, scénarios e2e, chargement d’une molécule test, lancement XTB opt, rendu HOMO‑LUMO, prédiction VoD.
+* **Linting et formatage** (ruff, black, isort, mypy), pre‑commit.
+* **CI/CD** GitHub Actions, build, tests, artefacts de prévisualisation, pages de documentation.
+
+### A5. Roadmap IAM2.0
+
+* Semaine 1 à 2, stabiliser UI, Ketcher local, correctifs validate\_xyz, panneau paramètres XTB complet avec info icône.
+* Semaine 3 à 4, bascule du calcul XTB vers Nox API, suivi SSE, cartes de résultats.
+* Semaine 5 à 6, orbitales .cube, IR, UV‑Vis, onglet Performance avec KJ et Keshavarz.
+* Semaine 7 à 8, intégration modèle ML VoD, export fiches moléculaires, tests e2e Playwright.
+
+### A6. Suggestions clés IAM2.0
+
+* Conserver Flask pour servir les pages au début, déplacer toute logique calcul vers Nox rapidement.
+* Centraliser la conversion MOL et SMILES côté backend pour contrôle qualité et traçabilité.
+* Introduire une couche « Adapters » minces côté IAM pour isoler l’API Nox et faciliter les mises à jour.
+
+---
+
+## Partie B — Plan de projet Nox
+
+### B1. Rôle et portée de Nox
+
+* Orchestration des calculs, exécution sandboxée, planification, suivi, stockage des artefacts, API unique pour IAM et autres clients.
+* Composant « Agent » optionnel pour l’automatisation, génération de prompts Copilot, suivi des tâches et exécution de workflows.
+
+### B2. Architecture technique
+
+* **API** FastAPI, Python 3.11 ou plus, Uvicorn, Pydantic v2, schéma OpenAPI versionné.
+* **File store** MinIO ou système de fichiers versionné, répertoires par JobID, journaux et sorties regroupés.
+* **Queue** Redis, Dramatiq ou RQ pour simplicité, Celery si besoin d’AMQP.
+* **Workers** runners isolés, xtb, psi4, gaussian, cantera\_cj, empirical\_predictors.
+* **Base de données** Postgres via SQLAlchemy, tables Project, Molecule, Job, Artifact, Result, Dataset, Model.
+* **Observabilité** logs structurés, Prometheus, Grafana, traçage OpenTelemetry si pertinent.
+
+### B3. Runners standardisés
+
+* **nox/runners/xtb.py**
+
+  * Entrées, chemin .xyz, charge, multiplicité, options gfn, opt, hess, uhf, chrg, json, ressources CPU.
+  * Sorties, énergie, gap, dipôle, charges, fréquences si demandées, fichiers .log, .out, .json, .cube.
+* **nox/runners/psi4.py**
+
+  * SP, opt, freq, méthodes et bases courantes, PCM optionnel, génération .cube.
+* **nox/runners/cantera\_cj.py** (prioritaire)
+
+  * Entrées, formule ou stoichiométrie, densité, ΔHf optionnelle, base thermo, inclusion B2O3(s) et Al2O3(s), sortie Pcj, Tcj, composition, VoD si EOS fourni.
+* **nox/runners/empirical.py**
+
+  * Kamlet–Jacobs, Keshavarz, autres équations, consolidation des sources.
+
+### B4. Endpoints principaux
+
+* POST **/molecules/convert** (SMILES ou MOL vers XYZ), POST **/jobs** (soumission), GET **/jobs/{id}** (statut), GET **/jobs/{id}/stream** (SSE), GET **/jobs/{id}/artifacts**, GET **/predict/cj/v1** et **/predict/cj-metals/v1**, GET **/predict/empirical/v1**, POST **/predict/ml/v1**.
+
+### B5. Sécurité et sandbox
+
+* Timeouts et limites mémoire, dossiers temporaires isolés, whitelist des exécutables, hash des entrées, signature des sorties.
+
+### B6. Données et modèles
+
+* Schéma de résultats normalisé, ResultBundle avec métadonnées, paramètres d’entrée, versions des logiciels, identifiants de source.
+
+### B7. Qualité, tests et CI Nox
+
+* Tests unitaires runners, tests d’intégration via docker‑compose, jeux d’exemples, contrat OpenAPI figé par tests de snapshot, linter, mypy, pre‑commit.
+
+### B8. Roadmap Nox
+
+* Semaine 1 à 2, squelette FastAPI, modèle Job, runners xtb et empirical, endpoints jobs, artefacts et streaming SSE.
+* Semaine 3 à 4, runner cantera\_cj, endpoints CJ, documentation OpenAPI, jeux de tests.
+* Semaine 5 à 6, runner psi4, .cube standard, stockage MinIO en option, métriques Prometheus.
+* Semaine 7 à 8, modèle ML VoD et intégration, pagination datasets, export résultats.
+
+### B9. Suggestions clés Nox
+
+* Préférer Dramatiq avec Redis pour démarrer rapidement, basculer vers Celery si charge augmente.
+* Figer un schéma ResultBundle minimal dès maintenant, éviter les migrations coûteuses plus tard.
+
+---
+
+## Partie C — Plan d’unification IAM2.0 + Nox
+
+### C1. Contrat d’API et modèles communs
+
+* **MoleculeInput**, format, SMILES, MOL, XYZ, charge et multiplicité.
+* **JobRequest** { engine, kind, resources, inputs }, **JobStatus** { state, progress, started\_at, finished\_at }, **Artifact** { name, type, path, size, checksum }, **ResultBundle** { scalaires, séries, fichiers }.
+* OpenAPI versionné, dossier schemas/ avec fichiers JSON, publication automatique sur GitHub Pages.
+
+### C2. Flux standard du point de vue IAM2.0
+
+1. Conversion locale ou via Nox, SMILES vers XYZ.
+2. Envoi d’un JobRequest XTB, options gfn et opt, réception JobID.
+3. Abonnement SSE pour progression, affichage des logs.
+4. À complétion, récupération ResultBundle et artefacts .cube, rendu 3D.
+5. Option Performance, appel /predict/empirical et /predict/cj, agrégation et affichage.
+
+### C3. Migration depuis l’existant
+
+* Étape 1, rediriger les routes existantes de backend.py vers Nox avec un thin‑proxy, conserver les signatures actuelles pour l’UI.
+* Étape 2, retirer progressivement la logique XTB et Psi4 de backend.py, ne garder que la conversion et la validation d’entrée.
+* Étape 3, activer l’onglet Performance qui appelle directement Nox.
+
+### C4. Validation unifiée
+
+* Jeu de 5 à 10 molécules étalons, par exemple CH4, nitrométhane, RDX, HMX, un BN représentatif.
+* Scénarios e2e Playwright, import SMILES, run XTB opt, récupérer HOMO et LUMO, exécuter CJ et KJ, comparer à seuils de tolérance.
+
+### C5. Risques et mesures
+
+* Instabilité de Ketcher, solution, version locale figée et tests de fumée.
+* Hétérogénéité des sorties XTB et Psi4, solution, parseurs robustes et tests de snapshot.
+* Charge CPU, solution, file d’attente et limites, exécution distante si le Pi est occupé.
+
+---
+
+## Revue rapide de l’existant et correctifs prioritaires
+
+* **iam\_viewer\_connected.html**, structure solide, clarifier sections de paramètres, corriger recouvrement des boutons, ajouter info icône pour chaque option XTB.
+* **script.js**, uniformiser fetch vers Nox, centraliser le mapping statut, ajouter gestion SSE et annulation.
+* **backend.py**, rôle de proxy mince, conversion SMILES et MOL, validation, suppression de l’exécution directe XTB à terme.
+* **xtb\_wrapper.py**, parser fiable de TOTAL ENERGY, HOMO‑LUMO GAP, dipôle, charges, produire toujours un xtbout.json, normaliser clés et unités.
+* **chem‑env.yaml** et requirements.txt, consolider, éviter doublons, cibler Python 3.11, vérifier versions RDKit et Psi4 compatibles.
+
+Correctifs immédiats proposés (priorité élevée),
+
+1. Consolidation Ketcher local, iframe et postMessage, test de fumée avec export MOL et conversion.
+2. Endpoint Nox /jobs minimal pour XTB, pipeline opt + propriétés, démo de bout en bout avec nitrométhane.
+3. Cartes de résultats, énergie, gap, dipôle, charges, liens de téléchargement vers artefacts.
+
+---
+
+## Outils et bonnes pratiques recommandés
+
+* **Backend** FastAPI, SQLAlchemy, Pydantic v2, Redis, Dramatiq, Uvicorn, Typer pour CLIs, rich pour logs.
+* **Frontend** Flask Jinja2 + HTMX en phase 1, React + Vite en phase 2, 3Dmol.js, Ketcher 3.4, recharts pour graphes.
+* **Qualité** pytest, ruff, mypy, black, pre‑commit, Playwright.
+* **Ops** Docker et docker‑compose, Makefile, GitHub Actions, versionnement sémantique, Conventional Commits, changelog automatique (release‑please).
+
+---
+
+## Esquisse de schémas JSON (extraits)
+
+* **JobRequest**
+
+```json
+{
+  "engine": "xtb",
+  "kind": "opt_properties",
+  "inputs": {
+    "xyz": "...",
+    "charge": 0,
+    "multiplicity": 1,
+    "params": { "gfn": 2, "opt": true, "hess": false, "uhf": false, "chrg": 0 }
+  }
+}
+```
+
+* **ResultBundle**
+
+```json
+{
+  "scalars": { "E_total_hartree": -123.456789, "gap_eV": 5.21, "dipole_D": 1.93 },
+  "series": { "ir_spectrum": [[400, 0.1], [401, 0.2]] },
+  "artifacts": [ { "name": "xtb.log", "type": "text/plain", "path": "..." }, { "name": "homo.cube", "type": "application/octet-stream", "path": "..." } ]
+}
+```
+
+---
+
+## Prompts Copilot prêts à l’emploi (résumé)
+
+1. **Créer l’API /jobs pour XTB**
+
+   * Implémenter un endpoint FastAPI POST /jobs qui accepte JobRequest engine=xtb, exécute xtb via subprocess dans un worker Dramatiq, stocke artefacts, retourne JobID, expose GET /jobs/{id} et GET /jobs/{id}/artifacts, streaming SSE pour les logs.
+2. **Intégrer Ketcher local**
+
+   * Ajouter iframe Ketcher, pont postMessage, fonction exportMol() et exportSmiles(), route Flask pour convertir MOL vers XYZ via RDKit, validations et messages d’erreur clairs.
+3. **Générer et afficher orbitales .cube**
+
+   * Dans le runner xtb, générer fichiers .cube HOMO et LUMO, exposer dans artifacts, côté front IAM, bouton « Afficher HOMO » et « Afficher LUMO » avec 3Dmol.js addVolumetricData.
+4. **Module Cantera CJ**
+
+   * Créer nox/runners/cantera\_cj.py, wrapper de l’équilibre, boucle de recherche CJ, endpoints /predict/cj/v1 et /predict/cj-metals/v1, tests avec composés CHNO simples et cas avec Al et B.
+
+---
+
+## Checklist de livraison incrémentale
+
+* [ ] Ketcher local stable avec test de fumée
+* [ ] Endpoint /jobs pour XTB, opt + propriétés
+* [ ] Affichage énergie, gap, dipôle, charges dans IAM
+* [ ] Génération et visualisation .cube HOMO et LUMO
+* [ ] Onglet Performance avec KJ et Keshavarz
+* [ ] Endpoint CJ Cantera et intégration UI
+* [ ] Tests e2e Playwright sur 5 molécules étalons
+* [ ] Documentation OpenAPI publiée et figée
+
+---
+
+## Annexe, arborescences recommandées
+
+**Repo Nox**
+
+```
+nox/
+  api/
+    main.py
+    routes/
+      jobs.py
+      predict.py
+    schemas/
+      job.py
+      result.py
+  runners/
+    xtb.py
+    psi4.py
+    gaussian.py
+    cantera_cj.py
+    empirical.py
+  services/
+    storage.py
+    queue.py
+    monitor.py
+  tests/
+    unit/
+    integration/
+  pyproject.toml
+  docker/
+    Dockerfile
+    compose.yml
+```
+
+**Repo IAM2.0**
+
+```
+IAM_GUI/
+  templates/
+    iam_viewer_connected.html
+  static/
+    ketcher/
+    js/
+      script.js
+    css/
+      style.css
+  backend/
+    proxy.py
+  tests/
+    e2e/
+```
+
+---
+
+## Conclusion
+
+Chemin recommandé, figer Nox comme service API unique et robuste, migrer IAM2.0 pour ne faire que l’interface et la préparation des entrées, prioriser XTB et le module Cantera CJ, ajouter ensuite Psi4 et le modèle ML. Cette trajectoire optimise la stabilité, la maintenabilité et la vitesse de développement, tout en répondant aux besoins immédiats de visualisation, d’analyse et de prédiction.
