@@ -1,0 +1,102 @@
+* d2b3ea6 (HEAD -> feat/iam2-seq-plan, origin/feat/iam2-seq-plan) Add Nox Architecture Audit setup: audit script, dev requirements, Mermaid generator, CI workflow, docs, and pre-commit
+| * 7ea3780 (origin/main) Create plan détaillé IAM2.0
+| | *   4fe6c33 (origin/feat/iam2-minimal-stack-cj-stub) Merge pull request #2 from lewispoul/feat/iam2-seq-plan
+| | |\  
+| |_|/  
+|/| |   
+* | | b60b717 Step 4: Phase 4 Empirical Predictor - Integrated ML-based property prediction and enhanced API endpoints
+* | | 5b3c83b docs: comprehensive session summary and continuation guide
+* | | ae5bb9b Step 4: Empirical Predictor with ML-based property prediction
+* | | 30937bd Step 3: Psi4 Runner with environment flag integration
+* | | 47a9bd9 STEP 2: Phase 2 XTB Runner - Environment flag integration and enhanced calculation system
+* | | 633052b STEP 1: Phase 1 Input & Conversion - Enhanced Ketcher endpoints and PDB export
+* | | ca0e739 STEP 0: baseline validation - clean cache and temp files
+* | | 2570439 (feat/iam2-minimal-stack-cj-stub) feat: add env.py utils + refactor persistence paths
+* | | 3474faf chore: update compiled Python bytecode files
+| |/  
+|/|   
+* | e8af6e5 (tag: v2.0.0-alpha) docs: export OpenAPI for v2.0.0-alpha
+* | b07fd40 chore: bump to 2.0.0-alpha + changelog
+* | 7257908 fix: resolve remaining test failures
+* | 4134fcd feat: Enhance export API with empty artifact handling and improve error responses
+* | 4c67649 feat: Implement new export API endpoints for IAM-2.0
+* | 4e300c8 Directory cleanup: Remove duplicates and add missing __init__.py files
+* | 791bbce Major refactor completion:
+* | 3ba21e4 Refactoring in progress - staging current state
+* | e21bd3c chore: update compiled Python files in __pycache__ directories
+* | 418651e (tag: legacy-compat-v1.0) Legacy Compatibility System - Pre-Refactor Snapshot
+* | fb54773 feat: Add Docker Compose configuration for development environment
+* | 5a19096 feat: Add comprehensive documentation and reports for Ketcher bundle, Nox API, and chemistry capabilities
+* | 6416ea4 docs: add comprehensive session progress report
+* | 8e116d5 feat: implement local Ketcher hosting with comprehensive test suite
+* | ee00b2e test(api): add conditional static tests for local Ketcher
+* | 83fd857 docs(readme): document local Ketcher hosting and UI usage
+* | 7e0092d feat(ui): wire export/convert/run buttons to backend endpoints with normalized handling
+* | 28d9519 feat(ui): add bridge.js for postMessage getMolfile/setSmiles/clear
+* | 316d2d2 feat(ui): ketcher.html uses local /static/ketcher/index.html
+* | d21ad08 chore(api): ensure /static mount for local assets
+* | f681557 chore(git): ignore public/static/ketcher vendor files
+* | bef8730 chore(ketcher): add fetch_ketcher.sh and README.local.md
+* | fd5e8ab Add comprehensive tests for API endpoints and persistence safety
+* | aced48e Normalizes error handling and enhances API persistence
+* | b3b3e27 feat(export): implement ZIP export endpoint with path validation and tests
+* | ec0bcaf Improves environment setup and CJ route validation
+* | cd7f9cb chore(structure): reorganize repo to standardized blueprint and fix imports
+* | 455c04f feat(results): add JSON persistence and benchmark CSV append test(results): add persistence util tests
+* |   54e64d9 Merge branch 'feat/iam2-minimal-stack-cj-stub' of https://github.com/lewispoul/IAM-2.0 into feat/iam2-minimal-stack-cj-stub
+|\ \  
+| * | 97bef59 feat(api): backend app wiring and normalized schema helpers
+| * | 5879bc4 chore(make): default to python3 and wire uvicorn run target
+| * | 365e358 chore(env): add chem-env.yaml and README install instructions
+| * | f856d7b chore(env,devx): add Copilot guardrails, VS Code settings, Makefile, and verify_env script
+| |/  
+| * 8d62d3c Update README.md
+| * 2a06945 Update README.md
+| * 2339339 Add files via upload
+| * e19f536 Add files via upload
+| * c4e8b31 Update IAM_Master_Technical_Report_FINAL.md
+| * 9872c3e Update IAM_2.0_Whitepaper.md
+| *   b949ece Merge pull request #1 from lewispoul/copilot/fix-c99d7f1e-1ef1-4ba9-b2a4-0ceabbff3c0a
+| |\  
+| | *   9ebf722 (origin/copilot/fix-c99d7f1e-1ef1-4ba9-b2a4-0ceabbff3c0a) Merge branch 'main' into copilot/fix-c99d7f1e-1ef1-4ba9-b2a4-0ceabbff3c0a
+| | |\  
+| | |/  
+| |/|   
+| * | a05b0fb Add files via upload
+| * | 0d87bcb Update IAM Master Technical Report to the final version
+| * | 29e4ae1 Update IAM Master Technical Report
+| | * 0b82eea Fix Mermaid diagram parse errors by quoting node labels with parentheses
+| | * 1472de5 Initial plan
+| |/  
+| * fbced1d Add files via upload
+| * feac62b Add files via upload
+| * 9cdcf6a Initial commit
+* 0b38771 (tag: backup/pre-filter-202508151701) chore(repo): remove Miniconda installer and ignore large binaries
+* f603e3e feat(docs): update IAM2_min_stack.md with detailed steps and added empirical predictor stubs
+* 1ce8252 feat(core): add empirical predictor interface (KJ and Keshavarz stubs) feat(api): wire empirical route to predictor test: add unit tests for empirical predictor and route
+* b392b81 feat(api): add FastAPI app and compute route stubs with normalized schema
+* 0d59312 feat(api): backend app wiring and normalized schema helpers
+* 2b69c3b chore(make): default to python3 and wire uvicorn run target
+* 43ee39b chore(env): add chem-env.yaml and README install instructions
+* eca0008 chore(env,devx): add Copilot guardrails, VS Code settings, Makefile, and verify_env script
+* e9f6dc7 (main) Update README.md
+* 58f992c Update README.md
+* 11713fb Add files via upload
+* 70132d5 Add files via upload
+* c9c979b Update IAM_Master_Technical_Report_FINAL.md
+* 5bb9b9b Update IAM_2.0_Whitepaper.md
+*   1835e7a Merge pull request #1 from lewispoul/copilot/fix-c99d7f1e-1ef1-4ba9-b2a4-0ceabbff3c0a
+|\  
+| *   cc5a250 (copilot/fix-c99d7f1e-1ef1-4ba9-b2a4-0ceabbff3c0a) Merge branch 'main' into copilot/fix-c99d7f1e-1ef1-4ba9-b2a4-0ceabbff3c0a
+| |\  
+| |/  
+|/|   
+* | 4c3b66e Add files via upload
+* | c8cd50f Update IAM Master Technical Report to the final version
+* | eb644b4 Update IAM Master Technical Report
+| * a5ca1fc Fix Mermaid diagram parse errors by quoting node labels with parentheses
+| * 7a5b286 Initial plan
+|/  
+* 6d34b19 Add files via upload
+* 8fe76af Add files via upload
+* ca93954 Initial commit

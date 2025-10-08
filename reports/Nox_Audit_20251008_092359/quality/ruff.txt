@@ -1,0 +1,1653 @@
+F401 [*] `iam.backend.schemas.common.fail` imported but unused
+ --> archive/legacy/iam/backend/routes/cj.py:2:44
+  |
+1 | from fastapi import APIRouter, HTTPException
+2 | from iam.backend.schemas.common import ok, fail
+  |                                            ^^^^
+3 | from pydantic import BaseModel
+  |
+help: Remove unused import: `iam.backend.schemas.common.fail`
+
+F401 [*] `fastapi.Request` imported but unused
+ --> archive/legacy/iam/backend/routes/empirical.py:1:32
+  |
+1 | from fastapi import APIRouter, Request
+  |                                ^^^^^^^
+2 | from iam.backend.schemas.common import ok, fail
+3 | from pydantic import BaseModel
+  |
+help: Remove unused import: `fastapi.Request`
+
+E402 Module level import not at top of file
+  --> archive/legacy/iam/backend/routes/empirical.py:11:1
+   |
+11 | from iam.core.empirical.iam_empirical_predictor import predict_empirical
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | from iam.backend.utils.persistence import save_result_json, append_benchmark_row
+   |
+
+E402 Module level import not at top of file
+  --> archive/legacy/iam/backend/routes/empirical.py:12:1
+   |
+11 | from iam.core.empirical.iam_empirical_predictor import predict_empirical
+12 | from iam.backend.utils.persistence import save_result_json, append_benchmark_row
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+13 |
+14 | @router.post("/compute/empirical")
+   |
+
+F811 [*] Redefinition of unused `ok` from line 7
+  --> archive/legacy/iam/backend/routes/export.py:7:40
+   |
+ 5 | import zipfile
+ 6 | import time
+ 7 | from iam.backend.schemas.common import ok, fail
+   |                                        -- previous definition of `ok` here
+ 8 | from iam.backend.schemas.common import ok, fail
+   |                                        ^^ `ok` redefined here
+ 9 |
+10 | router = APIRouter()
+   |
+help: Remove definition: `ok`
+
+F811 [*] Redefinition of unused `fail` from line 7
+  --> archive/legacy/iam/backend/routes/export.py:7:44
+   |
+ 5 | import zipfile
+ 6 | import time
+ 7 | from iam.backend.schemas.common import ok, fail
+   |                                            ---- previous definition of `fail` here
+ 8 | from iam.backend.schemas.common import ok, fail
+   |                                            ^^^^ `fail` redefined here
+ 9 |
+10 | router = APIRouter()
+   |
+help: Remove definition: `fail`
+
+F401 [*] `fastapi.Request` imported but unused
+ --> archive/legacy/iam/backend/routes/psi4.py:1:32
+  |
+1 | from fastapi import APIRouter, Request
+  |                                ^^^^^^^
+2 | from iam.backend.schemas.common import ok, fail
+3 | from pydantic import BaseModel
+  |
+help: Remove unused import: `fastapi.Request`
+
+F401 [*] `fastapi.Request` imported but unused
+ --> archive/legacy/iam/backend/routes/xtb.py:1:32
+  |
+1 | from fastapi import APIRouter, Request
+  |                                ^^^^^^^
+2 | from iam.backend.schemas.common import ok, fail
+3 | from pydantic import BaseModel
+  |
+help: Remove unused import: `fastapi.Request`
+
+E402 Module level import not at top of file
+ --> archive/legacy/iam/backend/schemas/common.py:4:1
+  |
+2 |     return {"ok": True, "data": data, "errors": []}
+3 |
+4 | from iam.backend.schemas.error import error_envelope
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | from typing import Optional
+6 | def fail(errors: list[str], code: int = 400, details: Optional[dict] = None) -> dict:
+  |
+
+E402 Module level import not at top of file
+ --> archive/legacy/iam/backend/schemas/common.py:5:1
+  |
+4 | from iam.backend.schemas.error import error_envelope
+5 | from typing import Optional
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+6 | def fail(errors: list[str], code: int = 400, details: Optional[dict] = None) -> dict:
+7 |     # Use first error as message, rest as details
+  |
+
+F401 [*] `backend.jobs.xtb_integration.calculator` imported but unused
+  --> backend/api/calc.py:12:56
+   |
+10 | from uuid import uuid4
+11 |
+12 | from backend.jobs.xtb_integration import calculator as xtb_calculator, run_xtb_calculation_enhanced, get_xtb_status
+   |                                                        ^^^^^^^^^^^^^^
+13 | from backend.jobs.psi4_integration import calculator as psi4_calculator, run_psi4_calculation_enhanced, get_psi4_status
+14 | from backend.jobs.empirical_predictor import empirical_predictor
+   |
+help: Remove unused import: `backend.jobs.xtb_integration.calculator`
+
+F401 [*] `backend.jobs.psi4_integration.calculator` imported but unused
+  --> backend/api/calc.py:13:57
+   |
+12 | from backend.jobs.xtb_integration import calculator as xtb_calculator, run_xtb_calculation_enhanced, get_xtb_status
+13 | from backend.jobs.psi4_integration import calculator as psi4_calculator, run_psi4_calculation_enhanced, get_psi4_status
+   |                                                         ^^^^^^^^^^^^^^^
+14 | from backend.jobs.empirical_predictor import empirical_predictor
+15 | from ..utils.env import flag
+   |
+help: Remove unused import: `backend.jobs.psi4_integration.calculator`
+
+F401 [*] `typing.Union` imported but unused
+ --> backend/api/envelope.py:6:47
+  |
+4 | """
+5 | import uuid
+6 | from typing import Any, Dict, List, Optional, Union
+  |                                               ^^^^^
+7 | from fastapi import HTTPException
+8 | from fastapi.responses import JSONResponse
+  |
+help: Remove unused import: `typing.Union`
+
+F401 [*] `fastapi.HTTPException` imported but unused
+ --> backend/api/envelope.py:7:21
+  |
+5 | import uuid
+6 | from typing import Any, Dict, List, Optional, Union
+7 | from fastapi import HTTPException
+  |                     ^^^^^^^^^^^^^
+8 | from fastapi.responses import JSONResponse
+  |
+help: Remove unused import: `fastapi.HTTPException`
+
+F401 [*] `fastapi.HTTPException` imported but unused
+ --> backend/api/export.py:4:38
+  |
+2 | Export API endpoints for IAM 2.0.
+3 | """
+4 | from fastapi import APIRouter, Body, HTTPException, Query
+  |                                      ^^^^^^^^^^^^^
+5 | from fastapi.responses import JSONResponse, StreamingResponse
+6 | from pathlib import Path
+  |
+help: Remove unused import: `fastapi.HTTPException`
+
+F401 [*] `fastapi.responses.StreamingResponse` imported but unused
+ --> backend/api/export.py:5:45
+  |
+3 | """
+4 | from fastapi import APIRouter, Body, HTTPException, Query
+5 | from fastapi.responses import JSONResponse, StreamingResponse
+  |                                             ^^^^^^^^^^^^^^^^^
+6 | from pathlib import Path
+7 | from typing import Dict, List, Any
+  |
+help: Remove unused import: `fastapi.responses.StreamingResponse`
+
+F401 [*] `pathlib.Path` imported but unused
+ --> backend/api/export.py:6:21
+  |
+4 | from fastapi import APIRouter, Body, HTTPException, Query
+5 | from fastapi.responses import JSONResponse, StreamingResponse
+6 | from pathlib import Path
+  |                     ^^^^
+7 | from typing import Dict, List, Any
+8 | import json
+  |
+help: Remove unused import: `pathlib.Path`
+
+F401 [*] `typing.Dict` imported but unused
+ --> backend/api/export.py:7:20
+  |
+5 | from fastapi.responses import JSONResponse, StreamingResponse
+6 | from pathlib import Path
+7 | from typing import Dict, List, Any
+  |                    ^^^^
+8 | import json
+9 | import io
+  |
+help: Remove unused import
+
+F401 [*] `typing.List` imported but unused
+ --> backend/api/export.py:7:26
+  |
+5 | from fastapi.responses import JSONResponse, StreamingResponse
+6 | from pathlib import Path
+7 | from typing import Dict, List, Any
+  |                          ^^^^
+8 | import json
+9 | import io
+  |
+help: Remove unused import
+
+F401 [*] `typing.Any` imported but unused
+ --> backend/api/export.py:7:32
+  |
+5 | from fastapi.responses import JSONResponse, StreamingResponse
+6 | from pathlib import Path
+7 | from typing import Dict, List, Any
+  |                                ^^^
+8 | import json
+9 | import io
+  |
+help: Remove unused import
+
+F401 [*] `io` imported but unused
+  --> backend/api/export.py:9:8
+   |
+ 7 | from typing import Dict, List, Any
+ 8 | import json
+ 9 | import io
+   |        ^^
+10 | import zipfile
+11 | import csv
+   |
+help: Remove unused import: `io`
+
+F401 [*] `json` imported but unused
+ --> backend/api/legacy.py:5:8
+  |
+3 | Provides Flask-style endpoints expected by existing tests.
+4 | """
+5 | import json
+  |        ^^^^
+6 | import os
+7 | import tempfile
+  |
+help: Remove unused import: `json`
+
+F401 [*] `os` imported but unused
+ --> backend/api/legacy.py:6:8
+  |
+4 | """
+5 | import json
+6 | import os
+  |        ^^
+7 | import tempfile
+8 | import zipfile
+  |
+help: Remove unused import: `os`
+
+F401 [*] `tempfile` imported but unused
+ --> backend/api/legacy.py:7:8
+  |
+5 | import json
+6 | import os
+7 | import tempfile
+  |        ^^^^^^^^
+8 | import zipfile
+9 | import hashlib
+  |
+help: Remove unused import: `tempfile`
+
+F401 [*] `zipfile` imported but unused
+  --> backend/api/legacy.py:8:8
+   |
+ 6 | import os
+ 7 | import tempfile
+ 8 | import zipfile
+   |        ^^^^^^^
+ 9 | import hashlib
+10 | from pathlib import Path
+   |
+help: Remove unused import: `zipfile`
+
+F401 [*] `pathlib.Path` imported but unused
+  --> backend/api/legacy.py:10:21
+   |
+ 8 | import zipfile
+ 9 | import hashlib
+10 | from pathlib import Path
+   |                     ^^^^
+11 | from typing import Any, Dict, List, Optional
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+   |
+help: Remove unused import: `pathlib.Path`
+
+F401 [*] `typing.Any` imported but unused
+  --> backend/api/legacy.py:11:20
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                    ^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `typing.Dict` imported but unused
+  --> backend/api/legacy.py:11:25
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                         ^^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `typing.List` imported but unused
+  --> backend/api/legacy.py:11:31
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                               ^^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `typing.Optional` imported but unused
+  --> backend/api/legacy.py:11:37
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                                     ^^^^^^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `fastapi.HTTPException` imported but unused
+  --> backend/api/legacy.py:12:38
+   |
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+   |                                      ^^^^^^^^^^^^^
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import: `fastapi.HTTPException`
+
+F401 [*] `backend.api.envelope.err` imported but unused
+  --> backend/api/legacy.py:16:15
+   |
+15 | from backend.api.envelope import (
+16 |     ok, fail, err, validation_error, not_found_error, 
+   |               ^^^
+17 |     bad_request_error, not_implemented_error, path_traversal_error
+18 | )
+   |
+help: Remove unused import
+
+F401 [*] `backend.api.envelope.not_found_error` imported but unused
+  --> backend/api/legacy.py:16:38
+   |
+15 | from backend.api.envelope import (
+16 |     ok, fail, err, validation_error, not_found_error, 
+   |                                      ^^^^^^^^^^^^^^^
+17 |     bad_request_error, not_implemented_error, path_traversal_error
+18 | )
+   |
+help: Remove unused import
+
+F401 [*] `backend.api.envelope.path_traversal_error` imported but unused
+  --> backend/api/legacy.py:17:47
+   |
+15 | from backend.api.envelope import (
+16 |     ok, fail, err, validation_error, not_found_error, 
+17 |     bad_request_error, not_implemented_error, path_traversal_error
+   |                                               ^^^^^^^^^^^^^^^^^^^^
+18 | )
+19 | from backend.converters.rdkit import smiles_to_xyz, molfile_to_xyz
+   |
+help: Remove unused import
+
+F401 [*] `backend.jobs.xtb_integration.run_xtb_calculation_enhanced` imported but unused
+  --> backend/api/legacy.py:20:42
+   |
+18 | )
+19 | from backend.converters.rdkit import smiles_to_xyz, molfile_to_xyz
+20 | from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
+   |                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+22 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |
+help: Remove unused import: `backend.jobs.xtb_integration.run_xtb_calculation_enhanced`
+
+F401 [*] `backend.utils.persistence.get_result` imported but unused
+  --> backend/api/legacy.py:22:52
+   |
+20 | from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
+21 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+22 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |                                                    ^^^^^^^^^^
+23 |
+24 | router = APIRouter()
+   |
+help: Remove unused import
+
+F401 [*] `backend.utils.persistence.list_results` imported but unused
+  --> backend/api/legacy.py:22:64
+   |
+20 | from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
+21 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+22 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |                                                                ^^^^^^^^^^^^
+23 |
+24 | router = APIRouter()
+   |
+help: Remove unused import
+
+F401 [*] `backend.utils.persistence.get_calc` imported but unused
+  --> backend/api/legacy.py:22:78
+   |
+20 | from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
+21 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+22 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |                                                                              ^^^^^^^^
+23 |
+24 | router = APIRouter()
+   |
+help: Remove unused import
+
+F401 [*] `backend.utils.persistence.list_calcs` imported but unused
+  --> backend/api/legacy.py:22:88
+   |
+20 | from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
+21 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+22 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |                                                                                        ^^^^^^^^^^
+23 |
+24 | router = APIRouter()
+   |
+help: Remove unused import
+
+F841 [*] Local variable `e` is assigned to but never used
+   --> backend/api/legacy.py:197:25
+    |
+195 |             return JSONResponse(content=fail([f"Conversion failed: {result.error}"]), status_code=200)
+196 |             
+197 |     except Exception as e:
+    |                         ^
+198 |         # Fallback to placeholder for any conversion errors
+199 |         return JSONResponse(content=ok({
+    |
+help: Remove assignment to unused variable `e`
+
+F811 [*] Redefinition of unused `HTTPException` from line 12
+   --> backend/api/legacy.py:350:25
+    |
+348 | async def compute_cj_legacy(payload: dict = Body(...)):
+349 |     """Legacy Chapman-Jouguet computation endpoint."""
+350 |     from fastapi import HTTPException
+    |                         ^^^^^^^^^^^^^ `HTTPException` redefined here
+351 |     
+352 |     stoich = payload.get("stoich")
+    |
+   ::: backend/api/legacy.py:12:38
+    |
+ 10 | from pathlib import Path
+ 11 | from typing import Any, Dict, List, Optional
+ 12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+    |                                      ------------- previous definition of `HTTPException` here
+ 13 | from fastapi.responses import JSONResponse
+    |
+help: Remove definition: `HTTPException`
+
+F841 Local variable `calc_task_result` is assigned to but never used
+   --> backend/api/legacy.py:491:9
+    |
+489 |         # Call run_calc_task for test compatibility
+490 |         from backend.main import run_calc_task
+491 |         calc_task_result = run_calc_task(method, {"xyz": xyz, "options": options})
+    |         ^^^^^^^^^^^^^^^^
+492 |         
+493 |         # Run XTB calculation by default
+    |
+help: Remove assignment to unused variable `calc_task_result`
+
+F401 [*] `pathlib.Path` imported but unused
+  --> backend/api/legacy_backup.py:10:21
+   |
+ 8 | import zipfile
+ 9 | import hashlib
+10 | from pathlib import Path
+   |                     ^^^^
+11 | from typing import Any, Dict, List, Optional
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+   |
+help: Remove unused import: `pathlib.Path`
+
+F401 [*] `typing.Any` imported but unused
+  --> backend/api/legacy_backup.py:11:20
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                    ^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `typing.Dict` imported but unused
+  --> backend/api/legacy_backup.py:11:25
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                         ^^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `typing.List` imported but unused
+  --> backend/api/legacy_backup.py:11:31
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                               ^^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `typing.Optional` imported but unused
+  --> backend/api/legacy_backup.py:11:37
+   |
+ 9 | import hashlib
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+   |                                     ^^^^^^^^
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import
+
+F401 [*] `fastapi.HTTPException` imported but unused
+  --> backend/api/legacy_backup.py:12:38
+   |
+10 | from pathlib import Path
+11 | from typing import Any, Dict, List, Optional
+12 | from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+   |                                      ^^^^^^^^^^^^^
+13 | from fastapi.responses import JSONResponse
+   |
+help: Remove unused import: `fastapi.HTTPException`
+
+F401 [*] `backend.api.envelope.err` imported but unused
+  --> backend/api/legacy_backup.py:16:15
+   |
+15 | from backend.api.envelope import (
+16 |     ok, fail, err, validation_error, not_found_error, 
+   |               ^^^
+17 |     bad_request_error, not_implemented_error, path_traversal_error
+18 | )
+   |
+help: Remove unused import: `backend.api.envelope.err`
+
+F401 [*] `backend.utils.persistence.get_calc` imported but unused
+  --> backend/api/legacy_backup.py:21:78
+   |
+19 | from backend.api.convert import SmilesRequest, MolfileRequest, convert_smiles_to_xyz, convert_molfile_to_xyz
+20 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+21 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |                                                                              ^^^^^^^^
+22 |
+23 | router = APIRouter()
+   |
+help: Remove unused import
+
+F401 [*] `backend.utils.persistence.list_calcs` imported but unused
+  --> backend/api/legacy_backup.py:21:88
+   |
+19 | from backend.api.convert import SmilesRequest, MolfileRequest, convert_smiles_to_xyz, convert_molfile_to_xyz
+20 | from backend.api.calc import XYZRequest, run_xtb, run_psi4
+21 | from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+   |                                                                                        ^^^^^^^^^^
+22 |
+23 | router = APIRouter()
+   |
+help: Remove unused import
+
+F811 Redefinition of unused `export_csv_legacy` from line 475
+   --> backend/api/legacy_backup.py:650:11
+    |
+649 | @router.post("/export/csv")
+650 | async def export_csv_legacy(payload: dict = Body(...)):
+    |           ^^^^^^^^^^^^^^^^^ `export_csv_legacy` redefined here
+651 |     """Legacy export CSV endpoint - forward to new API."""
+652 |     from backend.api.export import export_csv
+    |
+   ::: backend/api/legacy_backup.py:475:11
+    |
+474 | @router.post("/export/csv")
+475 | async def export_csv_legacy(payload: dict = Body(...)):
+    |           ----------------- previous definition of `export_csv_legacy` here
+476 |     """Export calculation results as CSV."""
+477 |     calculation_ids = payload.get("calculation_ids", [])
+    |
+help: Remove definition: `export_csv_legacy`
+
+F811 Redefinition of unused `export_json_legacy` from line 519
+   --> backend/api/legacy_backup.py:656:11
+    |
+655 | @router.post("/export/json")
+656 | async def export_json_legacy(payload: dict = Body(...)):
+    |           ^^^^^^^^^^^^^^^^^^ `export_json_legacy` redefined here
+657 |     """Legacy export JSON endpoint - forward to new API."""
+658 |     from backend.api.export import export_json
+    |
+   ::: backend/api/legacy_backup.py:519:11
+    |
+518 | @router.post("/export/json")
+519 | async def export_json_legacy(payload: dict = Body(...)):
+    |           ------------------ previous definition of `export_json_legacy` here
+520 |     """Export calculation results as JSON."""
+521 |     calculation_ids = payload.get("calculation_ids", [])
+    |
+help: Remove definition: `export_json_legacy`
+
+F811 Redefinition of unused `export_zip_legacy` from line 425
+   --> backend/api/legacy_backup.py:662:11
+    |
+661 | @router.post("/export/zip")
+662 | async def export_zip_legacy(payload: dict = Body(...)):
+    |           ^^^^^^^^^^^^^^^^^ `export_zip_legacy` redefined here
+663 |     """Legacy export ZIP endpoint - forward to new API."""
+664 |     from backend.api.export import export_zip
+    |
+   ::: backend/api/legacy_backup.py:425:11
+    |
+424 | @router.post("/export/zip")
+425 | async def export_zip_legacy(payload: dict = Body(...)):
+    |           ----------------- previous definition of `export_zip_legacy` here
+426 |     """Legacy export ZIP endpoint."""
+427 |     artifacts = payload.get("artifacts", [])
+    |
+help: Remove definition: `export_zip_legacy`
+
+F401 [*] `typing.List` imported but unused
+ --> backend/api/predict.py:7:41
+  |
+5 | from fastapi import APIRouter, HTTPException, status
+6 | from pydantic import BaseModel, Field, validator
+7 | from typing import Optional, Dict, Any, List
+  |                                         ^^^^
+8 | import logging
+9 | import hashlib
+  |
+help: Remove unused import: `typing.List`
+
+F401 [*] `math` imported but unused
+  --> backend/api/predict.py:10:8
+   |
+ 8 | import logging
+ 9 | import hashlib
+10 | import math
+   |        ^^^^
+11 |
+12 | logger = logging.getLogger(__name__)
+   |
+help: Remove unused import: `math`
+
+F401 [*] `json` imported but unused
+ --> backend/jobs/empirical_predictor.py:5:8
+  |
+3 | Implements ML-based property prediction and empirical analysis
+4 | """
+5 | import json
+  |        ^^^^
+6 | import logging
+7 | from typing import Dict, Any, List, Optional, Tuple
+  |
+help: Remove unused import: `json`
+
+F401 [*] `typing.Tuple` imported but unused
+ --> backend/jobs/empirical_predictor.py:7:47
+  |
+5 | import json
+6 | import logging
+7 | from typing import Dict, Any, List, Optional, Tuple
+  |                                               ^^^^^
+8 | from pathlib import Path
+9 | import tempfile
+  |
+help: Remove unused import: `typing.Tuple`
+
+F401 [*] `tempfile` imported but unused
+  --> backend/jobs/empirical_predictor.py:9:8
+   |
+ 7 | from typing import Dict, Any, List, Optional, Tuple
+ 8 | from pathlib import Path
+ 9 | import tempfile
+   |        ^^^^^^^^
+10 | import os
+11 | import time
+   |
+help: Remove unused import: `tempfile`
+
+F401 `sklearn` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/empirical_predictor.py:41:20
+   |
+39 |         # Check scikit-learn
+40 |         try:
+41 |             import sklearn
+   |                    ^^^^^^^
+42 |             models['sklearn'] = True
+43 |             logger.debug("scikit-learn available")
+   |
+help: Remove unused import: `sklearn`
+
+F401 `rdkit.Chem` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/empirical_predictor.py:50:31
+   |
+48 |         # Check RDKit for descriptors  
+49 |         try:
+50 |             from rdkit import Chem
+   |                               ^^^^
+51 |             from rdkit.Chem import Descriptors
+52 |             models['rdkit_descriptors'] = True
+   |
+help: Remove unused import: `rdkit.Chem`
+
+F401 `rdkit.Chem.Descriptors` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/empirical_predictor.py:51:36
+   |
+49 |         try:
+50 |             from rdkit import Chem
+51 |             from rdkit.Chem import Descriptors
+   |                                    ^^^^^^^^^^^
+52 |             models['rdkit_descriptors'] = True
+53 |             logger.debug("RDKit descriptors available")
+   |
+help: Remove unused import: `rdkit.Chem.Descriptors`
+
+F401 `tensorflow` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/empirical_predictor.py:60:20
+   |
+58 |         # Check TensorFlow/Keras
+59 |         try:
+60 |             import tensorflow
+   |                    ^^^^^^^^^^
+61 |             models['tensorflow'] = True
+62 |             logger.debug("TensorFlow available")
+   |
+help: Remove unused import: `tensorflow`
+
+F401 `mordred.Calculator` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/empirical_predictor.py:75:33
+   |
+73 |         # Check Mordred
+74 |         try:
+75 |             from mordred import Calculator, descriptors
+   |                                 ^^^^^^^^^^
+76 |             tools['mordred'] = True
+77 |             logger.debug("Mordred descriptors available")
+   |
+help: Remove unused import
+
+F401 `mordred.descriptors` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/empirical_predictor.py:75:45
+   |
+73 |         # Check Mordred
+74 |         try:
+75 |             from mordred import Calculator, descriptors
+   |                                             ^^^^^^^^^^^
+76 |             tools['mordred'] = True
+77 |             logger.debug("Mordred descriptors available")
+   |
+help: Remove unused import
+
+E701 Multiple statements on one line (colon)
+   --> backend/jobs/empirical_predictor.py:242:20
+    |
+240 |         hba = Descriptors.NumHAcceptors(mol)
+241 |         
+242 |         if mw > 500: violations += 1
+    |                    ^
+243 |         if logp > 5: violations += 1  
+244 |         if hbd > 5: violations += 1
+    |
+
+E701 Multiple statements on one line (colon)
+   --> backend/jobs/empirical_predictor.py:243:20
+    |
+242 |         if mw > 500: violations += 1
+243 |         if logp > 5: violations += 1  
+    |                    ^
+244 |         if hbd > 5: violations += 1
+245 |         if hba > 10: violations += 1
+    |
+
+E701 Multiple statements on one line (colon)
+   --> backend/jobs/empirical_predictor.py:244:19
+    |
+242 |         if mw > 500: violations += 1
+243 |         if logp > 5: violations += 1  
+244 |         if hbd > 5: violations += 1
+    |                   ^
+245 |         if hba > 10: violations += 1
+    |
+
+E701 Multiple statements on one line (colon)
+   --> backend/jobs/empirical_predictor.py:245:20
+    |
+243 |         if logp > 5: violations += 1  
+244 |         if hbd > 5: violations += 1
+245 |         if hba > 10: violations += 1
+    |                    ^
+246 |         
+247 |         # Additional factors
+    |
+
+E701 Multiple statements on one line (colon)
+   --> backend/jobs/empirical_predictor.py:248:51
+    |
+247 |         # Additional factors
+248 |         if Descriptors.NumRotatableBonds(mol) > 10: violations += 1
+    |                                                   ^
+249 |         if Descriptors.TPSA(mol) > 140: violations += 1
+    |
+
+E701 Multiple statements on one line (colon)
+   --> backend/jobs/empirical_predictor.py:249:39
+    |
+247 |         # Additional factors
+248 |         if Descriptors.NumRotatableBonds(mol) > 10: violations += 1
+249 |         if Descriptors.TPSA(mol) > 140: violations += 1
+    |                                       ^
+250 |         
+251 |         # Convert violations to drug-likeness score
+    |
+
+F401 [*] `json` imported but unused
+  --> backend/jobs/psi4_integration.py:10:8
+   |
+ 8 | import tempfile
+ 9 | import subprocess
+10 | import json
+   |        ^^^^
+11 | from typing import Dict, Any, Optional
+12 | from pathlib import Path
+   |
+help: Remove unused import: `json`
+
+F401 `psi4` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> backend/jobs/psi4_integration.py:58:20
+   |
+56 |         """Check if Psi4 is available as a Python module."""
+57 |         try:
+58 |             import psi4
+   |                    ^^^^
+59 |             return True
+60 |         except ImportError:
+   |
+help: Remove unused import: `psi4`
+
+F841 Local variable `wavefunction` is assigned to but never used
+   --> backend/jobs/psi4_integration.py:149:9
+    |
+148 |         # Extract properties
+149 |         wavefunction = psi4.core.get_global_option("WFN")
+    |         ^^^^^^^^^^^^
+150 |         
+151 |         results = {
+    |
+help: Remove assignment to unused variable `wavefunction`
+
+F841 Local variable `homo_found` is assigned to but never used
+   --> backend/jobs/psi4_integration.py:323:25
+    |
+321 |                         results["lumo_energy"] = float(parts[5])
+322 |                         results["homo_lumo_gap"] = results["lumo_energy"] - results["homo_energy"]
+323 |                         homo_found = True
+    |                         ^^^^^^^^^^
+324 |                 except (ValueError, IndexError):
+325 |                     pass
+    |
+help: Remove assignment to unused variable `homo_found`
+
+F401 [*] `typing.Optional` imported but unused
+ --> backend/jobs/psi4_stub.py:7:31
+  |
+5 | import asyncio
+6 | import logging
+7 | from typing import Dict, Any, Optional, List
+  |                               ^^^^^^^^
+8 | import hashlib
+9 | import math
+  |
+help: Remove unused import: `typing.Optional`
+
+F401 [*] `math` imported but unused
+  --> backend/jobs/psi4_stub.py:9:8
+   |
+ 7 | from typing import Dict, Any, Optional, List
+ 8 | import hashlib
+ 9 | import math
+   |        ^^^^
+10 |
+11 | logger = logging.getLogger(__name__)
+   |
+help: Remove unused import: `math`
+
+F841 Local variable `num_orbitals` is assigned to but never used
+  --> backend/jobs/psi4_stub.py:74:5
+   |
+73 |     # Generate orbital energies (mock HOMO/LUMO)
+74 |     num_orbitals = atom_count * 7  # Rough estimate
+   |     ^^^^^^^^^^^^
+75 |     homo_energy = -0.3 - (hash_int % 100) / 1000.0
+76 |     lumo_energy = 0.1 + (hash_int % 150) / 1000.0
+   |
+help: Remove assignment to unused variable `num_orbitals`
+
+F541 [*] f-string without any placeholders
+   --> backend/jobs/xtb_integration.py:108:17
+    |
+106 |                 str(xyz_file),
+107 |                 f"--{method}",
+108 |                 f"--chrg", str(charge),
+    |                 ^^^^^^^^^
+109 |                 f"--uhf", str(multiplicity - 1),
+110 |                 "--json"  # Request JSON output if supported
+    |
+help: Remove extraneous `f` prefix
+
+F541 [*] f-string without any placeholders
+   --> backend/jobs/xtb_integration.py:109:17
+    |
+107 |                 f"--{method}",
+108 |                 f"--chrg", str(charge),
+109 |                 f"--uhf", str(multiplicity - 1),
+    |                 ^^^^^^^^
+110 |                 "--json"  # Request JSON output if supported
+111 |             ]
+    |
+help: Remove extraneous `f` prefix
+
+E741 Ambiguous variable name: `l`
+   --> backend/jobs/xtb_integration.py:213:33
+    |
+211 |         # Count atoms from original calculation
+212 |         if "atom_count" not in results:
+213 |             atom_lines = [l for l in stdout.split('\n') if 'atoms' in l.lower()]
+    |                                 ^
+214 |             if atom_lines:
+215 |                 try:
+    |
+
+F401 [*] `typing.Optional` imported but unused
+ --> backend/jobs/xtb_stub.py:7:31
+  |
+5 | import asyncio
+6 | import logging
+7 | from typing import Dict, Any, Optional
+  |                               ^^^^^^^^
+8 | import hashlib
+  |
+help: Remove unused import: `typing.Optional`
+
+F401 [*] `os` imported but unused
+ --> backend/utils/persistence.py:7:8
+  |
+5 | import time
+6 | import re
+7 | import os
+  |        ^^
+8 | from pathlib import Path
+9 | from typing import Dict, Any, List, Optional
+  |
+help: Remove unused import: `os`
+
+E701 Multiple statements on one line (colon)
+  --> backend/utils/persistence.py:92:15
+   |
+90 |         fieldnames = sorted(row.keys())
+91 |         w = csv.DictWriter(f, fieldnames=fieldnames)
+92 |         if new: w.writeheader()
+   |               ^
+93 |         w.writerow(row)
+94 |     return str(fp)
+   |
+
+E701 Multiple statements on one line (colon)
+  --> backend/utils/persistence_new.py:72:15
+   |
+70 |         fieldnames = sorted(row.keys())
+71 |         w = csv.DictWriter(f, fieldnames=fieldnames)
+72 |         if new: w.writeheader()
+   |               ^
+73 |         w.writerow(row)
+74 |     return str(fp)
+   |
+
+E401 [*] Multiple imports on one line
+ --> backend/utils/persistence_old.py:2:1
+  |
+1 | from pathlib import Path
+2 | import json, csv, time
+  | ^^^^^^^^^^^^^^^^^^^^^^
+3 | import os
+4 | import re
+  |
+help: Split imports
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:10:1
+   |
+ 8 | """Persistence layer for IAM-2.0."""
+ 9 |
+10 | import json
+   | ^^^^^^^^^^^
+11 | import csv
+12 | import time
+   |
+
+F811 [*] Redefinition of unused `json` from line 2
+  --> backend/utils/persistence_old.py:10:8
+   |
+ 8 | """Persistence layer for IAM-2.0."""
+ 9 |
+10 | import json
+   |        ^^^^ `json` redefined here
+11 | import csv
+12 | import time
+   |
+  ::: backend/utils/persistence_old.py:2:8
+   |
+ 1 | from pathlib import Path
+ 2 | import json, csv, time
+   |        ---- previous definition of `json` here
+ 3 | import os
+ 4 | import re
+   |
+help: Remove definition: `json`
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:11:1
+   |
+10 | import json
+11 | import csv
+   | ^^^^^^^^^^
+12 | import time
+13 | import re
+   |
+
+F811 [*] Redefinition of unused `csv` from line 2
+  --> backend/utils/persistence_old.py:11:8
+   |
+10 | import json
+11 | import csv
+   |        ^^^ `csv` redefined here
+12 | import time
+13 | import re
+   |
+  ::: backend/utils/persistence_old.py:2:14
+   |
+ 1 | from pathlib import Path
+ 2 | import json, csv, time
+   |              --- previous definition of `csv` here
+ 3 | import os
+ 4 | import re
+   |
+help: Remove definition: `csv`
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:12:1
+   |
+10 | import json
+11 | import csv
+12 | import time
+   | ^^^^^^^^^^^
+13 | import re
+14 | import os
+   |
+
+F811 [*] Redefinition of unused `time` from line 2
+  --> backend/utils/persistence_old.py:12:8
+   |
+10 | import json
+11 | import csv
+12 | import time
+   |        ^^^^ `time` redefined here
+13 | import re
+14 | import os
+   |
+  ::: backend/utils/persistence_old.py:2:19
+   |
+ 1 | from pathlib import Path
+ 2 | import json, csv, time
+   |                   ---- previous definition of `time` here
+ 3 | import os
+ 4 | import re
+   |
+help: Remove definition: `time`
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:13:1
+   |
+11 | import csv
+12 | import time
+13 | import re
+   | ^^^^^^^^^
+14 | import os
+15 | from pathlib import Path
+   |
+
+F811 [*] Redefinition of unused `re` from line 4
+  --> backend/utils/persistence_old.py:13:8
+   |
+11 | import csv
+12 | import time
+13 | import re
+   |        ^^ `re` redefined here
+14 | import os
+15 | from pathlib import Path
+   |
+  ::: backend/utils/persistence_old.py:4:8
+   |
+ 2 | import json, csv, time
+ 3 | import os
+ 4 | import re
+   |        -- previous definition of `re` here
+ 5 | from typing import Dict, List, Optional, Any
+   |
+help: Remove definition: `re`
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:14:1
+   |
+12 | import time
+13 | import re
+14 | import os
+   | ^^^^^^^^^
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   |
+
+F811 [*] Redefinition of unused `os` from line 3
+  --> backend/utils/persistence_old.py:14:8
+   |
+12 | import time
+13 | import re
+14 | import os
+   |        ^^ `os` redefined here
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   |
+  ::: backend/utils/persistence_old.py:3:8
+   |
+ 1 | from pathlib import Path
+ 2 | import json, csv, time
+ 3 | import os
+   |        -- previous definition of `os` here
+ 4 | import re
+ 5 | from typing import Dict, List, Optional, Any
+   |
+help: Remove definition: `os`
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:15:1
+   |
+13 | import re
+14 | import os
+15 | from pathlib import Path
+   | ^^^^^^^^^^^^^^^^^^^^^^^^
+16 | from typing import Dict, Any, List, Optional
+   |
+
+F811 [*] Redefinition of unused `Path` from line 1
+  --> backend/utils/persistence_old.py:15:21
+   |
+13 | import re
+14 | import os
+15 | from pathlib import Path
+   |                     ^^^^ `Path` redefined here
+16 | from typing import Dict, Any, List, Optional
+   |
+  ::: backend/utils/persistence_old.py:1:21
+   |
+ 1 | from pathlib import Path
+   |                     ---- previous definition of `Path` here
+ 2 | import json, csv, time
+ 3 | import os
+   |
+help: Remove definition: `Path`
+
+E402 Module level import not at top of file
+  --> backend/utils/persistence_old.py:16:1
+   |
+14 | import os
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17 |
+18 | # Dynamic path resolution to respect environment changes
+   |
+
+F811 [*] Redefinition of unused `Dict` from line 5
+  --> backend/utils/persistence_old.py:16:20
+   |
+14 | import os
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   |                    ^^^^ `Dict` redefined here
+17 |
+18 | # Dynamic path resolution to respect environment changes
+   |
+  ::: backend/utils/persistence_old.py:5:20
+   |
+ 3 | import os
+ 4 | import re
+ 5 | from typing import Dict, List, Optional, Any
+   |                    ---- previous definition of `Dict` here
+ 6 |
+ 7 | # Honor the IAM_RESULTS_BASE environment variable used by tests
+   |
+help: Remove definition: `Dict`
+
+F811 [*] Redefinition of unused `Any` from line 5
+  --> backend/utils/persistence_old.py:16:26
+   |
+14 | import os
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   |                          ^^^ `Any` redefined here
+17 |
+18 | # Dynamic path resolution to respect environment changes
+   |
+  ::: backend/utils/persistence_old.py:5:42
+   |
+ 3 | import os
+ 4 | import re
+ 5 | from typing import Dict, List, Optional, Any
+   |                                          --- previous definition of `Any` here
+ 6 |
+ 7 | # Honor the IAM_RESULTS_BASE environment variable used by tests
+   |
+help: Remove definition: `Any`
+
+F811 [*] Redefinition of unused `List` from line 5
+  --> backend/utils/persistence_old.py:16:31
+   |
+14 | import os
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   |                               ^^^^ `List` redefined here
+17 |
+18 | # Dynamic path resolution to respect environment changes
+   |
+  ::: backend/utils/persistence_old.py:5:26
+   |
+ 3 | import os
+ 4 | import re
+ 5 | from typing import Dict, List, Optional, Any
+   |                          ---- previous definition of `List` here
+ 6 |
+ 7 | # Honor the IAM_RESULTS_BASE environment variable used by tests
+   |
+help: Remove definition: `List`
+
+F811 [*] Redefinition of unused `Optional` from line 5
+  --> backend/utils/persistence_old.py:16:37
+   |
+14 | import os
+15 | from pathlib import Path
+16 | from typing import Dict, Any, List, Optional
+   |                                     ^^^^^^^^ `Optional` redefined here
+17 |
+18 | # Dynamic path resolution to respect environment changes
+   |
+  ::: backend/utils/persistence_old.py:5:32
+   |
+ 3 | import os
+ 4 | import re
+ 5 | from typing import Dict, List, Optional, Any
+   |                                -------- previous definition of `Optional` here
+ 6 |
+ 7 | # Honor the IAM_RESULTS_BASE environment variable used by tests
+   |
+help: Remove definition: `Optional`
+
+F821 Undefined name `RESULTS_BASE`
+  --> backend/utils/persistence_old.py:31:8
+   |
+29 |     """Get the Exports subdirectory."""
+30 |     return get_results_base() / "Exports"
+31 | BASE = RESULTS_BASE
+   |        ^^^^^^^^^^^^
+32 | RESULTS = RESULTS_BASE / "Results"
+33 | EXPORTS = RESULTS_BASE / "Exports"
+   |
+
+F821 Undefined name `RESULTS_BASE`
+  --> backend/utils/persistence_old.py:32:11
+   |
+30 |     return get_results_base() / "Exports"
+31 | BASE = RESULTS_BASE
+32 | RESULTS = RESULTS_BASE / "Results"
+   |           ^^^^^^^^^^^^
+33 | EXPORTS = RESULTS_BASE / "Exports"
+   |
+
+F821 Undefined name `RESULTS_BASE`
+  --> backend/utils/persistence_old.py:33:11
+   |
+31 | BASE = RESULTS_BASE
+32 | RESULTS = RESULTS_BASE / "Results"
+33 | EXPORTS = RESULTS_BASE / "Exports"
+   |           ^^^^^^^^^^^^
+34 |
+35 | def ensure_base() -> Path:
+   |
+
+F821 Undefined name `RESULTS_BASE`
+  --> backend/utils/persistence_old.py:39:12
+   |
+37 |     RESULTS.mkdir(parents=True, exist_ok=True)
+38 |     EXPORTS.mkdir(parents=True, exist_ok=True)
+39 |     return RESULTS_BASE
+   |            ^^^^^^^^^^^^
+40 |
+41 | def calc_dir(calc_id: str) -> Path:
+   |
+
+E701 Multiple statements on one line (colon)
+  --> backend/utils/persistence_old.py:87:15
+   |
+85 |         fieldnames = sorted(row.keys())
+86 |         w = csv.DictWriter(f, fieldnames=fieldnames)
+87 |         if new: w.writeheader()
+   |               ^
+88 |         w.writerow(row)
+89 |     return str(fp)
+   |
+
+F401 [*] `requests` imported but unused
+ --> debug_run.py:3:8
+  |
+1 | #!/usr/bin/env python3
+2 |
+3 | import requests
+  |        ^^^^^^^^
+4 | import json
+5 | from fastapi.testclient import TestClient
+  |
+help: Remove unused import: `requests`
+
+F401 [*] `json` imported but unused
+ --> debug_run.py:4:8
+  |
+3 | import requests
+4 | import json
+  |        ^^^^
+5 | from fastapi.testclient import TestClient
+6 | import sys
+  |
+help: Remove unused import: `json`
+
+F401 [*] `sys` imported but unused
+  --> integration_test_final.py:8:8
+   |
+ 7 | import requests
+ 8 | import sys
+   |        ^^^
+ 9 | import json
+10 | from pathlib import Path
+   |
+help: Remove unused import: `sys`
+
+F401 [*] `json` imported but unused
+  --> integration_test_final.py:9:8
+   |
+ 7 | import requests
+ 8 | import sys
+ 9 | import json
+   |        ^^^^
+10 | from pathlib import Path
+   |
+help: Remove unused import: `json`
+
+F401 [*] `pathlib.Path` imported but unused
+  --> integration_test_final.py:10:21
+   |
+ 8 | import sys
+ 9 | import json
+10 | from pathlib import Path
+   |                     ^^^^
+11 |
+12 | def test_integration():
+   |
+help: Remove unused import: `pathlib.Path`
+
+F541 [*] f-string without any placeholders
+  --> integration_test_final.py:72:19
+   |
+71 |         if 'Access-Control-Allow-Origin' in cors_headers:
+72 |             print(f"   ✅ CORS headers present")
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+73 |             print(f"   🌍 Allow-Origin: {cors_headers.get('Access-Control-Allow-Origin')}")
+74 |             results["cors_enabled"] = True
+   |
+help: Remove extraneous `f` prefix
+
+E722 Do not use bare `except`
+   --> integration_test_final.py:98:13
+    |
+ 96 |                 print(f"   📊 API response: {api_data}")
+ 97 |                 results["api_functional"] = True
+ 98 |             except:
+    |             ^^^^^^
+ 99 |                 print("   ⚠️ API returned non-JSON response")
+100 |         else:
+    |
+
+F401 [*] `pathlib.Path` imported but unused
+ --> scripts/verify_env.py:6:21
+  |
+4 | import subprocess
+5 | import shutil
+6 | from pathlib import Path
+  |                     ^^^^
+7 |
+8 | # Python packages to check
+  |
+help: Remove unused import: `pathlib.Path`
+
+F541 [*] f-string without any placeholders
+  --> scripts/verify_env.py:93:11
+   |
+92 |     # Check for Ketcher availability (via CDN - always available)
+93 |     print(f"✅ Ketcher      : available (via CDN)")
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+94 |     
+95 |     print()
+   |
+help: Remove extraneous `f` prefix
+
+F401 [*] `webbrowser` imported but unused
+  --> test_ui_integration.py:14:8
+   |
+12 | """
+13 |
+14 | import webbrowser
+   |        ^^^^^^^^^^
+15 | import os
+16 | import time
+   |
+help: Remove unused import: `webbrowser`
+
+E722 Do not use bare `except`
+  --> test_ui_integration.py:50:13
+   |
+48 |                     opened = True
+49 |                     break
+50 |             except:
+   |             ^^^^^^
+51 |                 continue
+   |
+
+F401 [*] `pytest` imported but unused
+ --> tests/api/test_convert.py:1:8
+  |
+1 | import pytest
+  |        ^^^^^^
+2 | from fastapi.testclient import TestClient
+3 | from backend.main import app
+  |
+help: Remove unused import: `pytest`
+
+F401 [*] `pathlib.Path` imported but unused
+ --> tests/api/test_convert_and_ketcher.py:2:21
+  |
+1 | # tests/api/test_convert_and_ketcher.py
+2 | from pathlib import Path
+  |                     ^^^^
+3 |
+4 | MOCK_MOLFILE = """\
+  |
+help: Remove unused import: `pathlib.Path`
+
+E712 Avoid equality comparisons to `True`; use `data["ok"]:` for truth checks
+  --> tests/api/test_envelope_edge_cases.py:64:12
+   |
+62 |     assert isinstance(data["data"], dict)
+63 |     assert isinstance(data["errors"], list)
+64 |     assert data["ok"] == True
+   |            ^^^^^^^^^^^^^^^^^^
+65 |     assert data["errors"] == []
+   |
+help: Replace with `data["ok"]`
+
+F401 [*] `pathlib.Path` imported but unused
+ --> tests/api/test_export_and_persistence.py:3:21
+  |
+1 | # tests/api/test_export_and_persistence.py
+2 | import json
+3 | from pathlib import Path
+  |                     ^^^^
+  |
+help: Remove unused import: `pathlib.Path`
+
+F401 [*] `pytest` imported but unused
+ --> tests/api/test_http_examples.py:4:8
+  |
+2 | Test that the example HTTP requests work correctly
+3 | """
+4 | import pytest
+  |        ^^^^^^
+5 | from fastapi.testclient import TestClient
+6 | from backend.main import app
+  |
+help: Remove unused import: `pytest`
+
+F401 [*] `pytest` imported but unused
+ --> tests/api/test_ketcher.py:1:8
+  |
+1 | import pytest
+  |        ^^^^^^
+2 | from fastapi.testclient import TestClient
+3 | from backend.main import app
+  |
+help: Remove unused import: `pytest`
+
+F401 [*] `os` imported but unused
+ --> tests/api/test_ketcher_run.py:2:8
+  |
+1 | # tests/api/test_ketcher_run.py
+2 | import os
+  |        ^^
+3 | from pathlib import Path
+4 | from unittest.mock import patch
+  |
+help: Remove unused import: `os`
+
+F401 [*] `pathlib.Path` imported but unused
+ --> tests/api/test_ketcher_run.py:3:21
+  |
+1 | # tests/api/test_ketcher_run.py
+2 | import os
+3 | from pathlib import Path
+  |                     ^^^^
+4 | from unittest.mock import patch
+  |
+help: Remove unused import: `pathlib.Path`
+
+F841 Local variable `body` is assigned to but never used
+  --> tests/api/test_ketcher_run.py:65:5
+   |
+63 |     req = {"xyz": "2\nMethane\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0"}
+64 |     r = client.post("/run/", json=req)
+65 |     body = assert_ok(r)
+   |     ^^^^
+66 |     mock_run.assert_called_once()
+67 |     args, kwargs = mock_run.call_args
+   |
+help: Remove assignment to unused variable `body`
+
+F841 Local variable `body` is assigned to but never used
+  --> tests/api/test_ketcher_run.py:74:5
+   |
+72 |     req = {"xyz": "2\nMethane\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0"}
+73 |     r = client.post("/run/", json=req)
+74 |     body = assert_ok(r)
+   |     ^^^^
+75 |     
+76 |     # Check if any files were created in the results directory
+   |
+help: Remove assignment to unused variable `body`
+
+F401 [*] `pytest` imported but unused
+ --> tests/api/test_persistence_safety.py:4:8
+  |
+2 | Tests for persistence hooks and /export/zip safety
+3 | """
+4 | import pytest
+  |        ^^^^^^
+5 | import tempfile
+6 | import os
+  |
+help: Remove unused import: `pytest`
+
+F401 [*] `json` imported but unused
+ --> tests/api/test_xtb_stub.py:2:8
+  |
+1 | import requests
+2 | import json
+  |        ^^^^
+3 |
+4 | def test_xtb_stub_json():
+  |
+help: Remove unused import: `json`
+
+F541 [*] f-string without any placeholders
+  --> tests/integration/test_ketcher_live.py:51:19
+   |
+50 |         except json.JSONDecodeError:
+51 |             print(f"   ❌ FAIL: Invalid JSON response")
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+52 |             print(f"   Raw response: {response.text[:200]}...")
+   |
+help: Remove extraneous `f` prefix
+
+F541 [*] f-string without any placeholders
+   --> tests/integration/test_ketcher_live.py:175:15
+    |
+173 |         print(f"❌ Cannot connect to backend at {API_BASE}")
+174 |         print(f"   Error: {e}")
+175 |         print(f"   💡 Start backend with: uvicorn iam.backend.app:app --reload --port 8010")
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: Remove extraneous `f` prefix
+
+F401 [*] `pytest` imported but unused
+ --> tests/unit/test_health.py:2:8
+  |
+1 | from fastapi.testclient import TestClient
+2 | import pytest
+  |        ^^^^^^
+3 | from backend.main import app
+  |
+help: Remove unused import: `pytest`
+
+E741 Ambiguous variable name: `l`
+  --> tests/utils/test_persistence.py:22:32
+   |
+20 |     lines = (tmp_path / "benchmark_auto.csv").read_text().splitlines()
+21 |     assert lines[0].startswith("Pcj,Tcj,name,ok") or lines[0].startswith("name,ok,Pcj,Tcj")
+22 |     assert any("test" in l for l in lines)
+   |                                ^
+   |
+
+Found 135 errors.
+[*] 90 fixable with the `--fix` option (7 hidden fixes can be enabled with the `--unsafe-fixes` option).

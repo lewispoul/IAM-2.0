@@ -1,0 +1,3 @@
+VALID: openapi/iam2.v1.json
+VALID: openapi/iam2.v1.yaml
+INVALID: reports/Nox_Audit_20251008_091711/tests/htmlcov/status.json
