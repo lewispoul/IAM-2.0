@@ -43,6 +43,10 @@ test: ## Run test suite
 	@echo "Running test suite..."
 	pytest tests/ -v
 
+test-unit: ## Run unit tests only (exclude e2e/integration)
+	@echo "Running unit tests..."
+	pytest tests/ -q -k "not e2e and not integration"
+
 test-cov: ## Run tests with coverage report
 	@echo "Running tests with coverage..."
 	pytest tests/ -v --cov=backend --cov-report=html --cov-report=term-missing
@@ -73,6 +77,10 @@ format-check: ## Check code formatting
 	black --check backend/ tests/
 
 type-check: ## Run type checking with mypy
+	@echo "Running type checker..."
+	mypy backend/ --ignore-missing-imports
+
+types: ## Run type checking with mypy (alias)
 	@echo "Running type checker..."
 	mypy backend/ --ignore-missing-imports
 

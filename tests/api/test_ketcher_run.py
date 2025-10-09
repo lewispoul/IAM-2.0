@@ -60,7 +60,7 @@ def test_run_internal_task_call(mock_run, client, tmp_results_dir):
     mock_run.return_value = {"calc_id": "test123", "status": "submitted"}
     req = {"xyz": "2\nMethane\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0"}
     r = client.post("/run/", json=req)
-    body = assert_ok(r)
+    assert_ok(r)
     mock_run.assert_called_once()
     args, kwargs = mock_run.call_args
     assert "xyz" in kwargs or len(args) >= 1
@@ -69,7 +69,7 @@ def test_run_internal_task_call(mock_run, client, tmp_results_dir):
 def test_run_creates_files_in_results(client, tmp_results_dir):
     req = {"xyz": "2\nMethane\nC 0.0 0.0 0.0\nH 0.0 1.0 0.0"}
     r = client.post("/run/", json=req)
-    body = assert_ok(r)
+    assert_ok(r)
     
     # Check if any files were created in the results directory
     results_files = list(tmp_results_dir.rglob("*"))

@@ -12,6 +12,47 @@ from fastapi.testclient import TestClient
 from backend.main import app
 
 
+@pytest.fixture(autouse=True, scope="session")
+def _skip_static_mount():
+    os.environ["NOX_SKIP_STATIC_MOUNT"] = "1"
+    yield
+    os.environ.pop("NOX_SKIP_STATIC_MOUNT", None)
+
+
+def rdkit_available():
+    try:
+        import rdkit.Chem  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+DEFAULT_URL = "http://127.0.0.1:5055"
+
+
+def _server_url():
+    return os.getenv("NOX_TEST_SERVER_URL", DEFAULT_URL)
+
+
+def _server_up(url: str) -> bool:
+    try:
+        import httpx  # installed in requirements-test
+        with httpx.Client(timeout=1.5) as c:
+            r = c.get(url + "/health", follow_redirects=True)
+            return r.status_code < 500
+    except Exception:
+        return False
+
+
+def pytest_runtest_setup(item):
+    # existing rdkit logic stays
+    if "rdkit" in item.keywords and not rdkit_available():
+        pytest.skip("RDKit not available in this environment")
+    # ADD: integration skip logic
+    if "integration" in item.keywords and not _server_up(_server_url()):
+        pytest.skip(f"Integration server not available at {_server_url()}")
+
+
 def _port_open(host: str, port: int) -> bool:
     """Check if a port is open with a quick timeout."""
     try:
@@ -37,21 +78,23 @@ def _health_ok() -> bool:
 def pytest_collection_modifyitems(config, items):
     """Mark external integration tests and skip if service not available."""
     require_external = (os.getenv("IAM_E2E") == "1") and _health_ok()
-    
+
     # Known external integration test files
     external_patterns = [
         "test_molfile_to_xyz.py",
-        "test_psi4_stub.py", 
+        "test_psi4_stub.py",
         "test_smiles_to_xyz.py",
         "test_xtb_stub.py"
     ]
-    
+
     for item in items:
         nid = item.nodeid
         if any(pattern in nid for pattern in external_patterns):
             item.add_marker(pytest.mark.external)
             if not require_external:
-                item.add_marker(pytest.mark.skip(reason="External service not running (set IAM_E2E=1 and start service on :5000)"))
+                item.add_marker(pytest.mark.skip(
+                    reason="External service not running "
+                           "(set IAM_E2E=1 and start service on :5000)"))
 
 
 @pytest.fixture(scope="session")
@@ -75,26 +118,26 @@ def flask_test_client():
     from flask import Flask
     app_flask = Flask(__name__)
     app_flask.config['TESTING'] = True
-    
+
     @app_flask.route('/health')
     def health():
         return {'status': 'ok'}
-    
+
     with app_flask.test_client() as client:
         yield client
 
 
-@pytest.fixture  
+@pytest.fixture
 def fastapi_test_client():
     """Enhanced FastAPI test client for IAM2.0 endpoints."""
     from fastapi import FastAPI
-    
+
     test_app = FastAPI()
-    
+
     @test_app.get("/health")
     def health():
         return {"status": "ok"}
-    
+
     @test_app.post("/api/convert/smiles-to-xyz")
     def smiles_to_xyz(data: dict):
         # Mock response for testing
@@ -103,7 +146,7 @@ def fastapi_test_client():
             "xyz": "1\ntest\nC 0.0 0.0 0.0",
             "atoms": 1
         }
-    
+
     @test_app.post("/api/calc/xtb")
     def xtb_calc(data: dict):
         # Mock response for testing
@@ -114,7 +157,7 @@ def fastapi_test_client():
                 "status": "completed"
             }
         }
-    
+
     client = TestClient(test_app)
     yield client
 
@@ -124,11 +167,11 @@ def mock_rdkit():
     """Mock RDKit functionality for testing without dependencies."""
     mock_mol = Mock()
     mock_mol.GetNumAtoms.return_value = 6
-    
+
     mock_rdkit = Mock()
     mock_rdkit.Chem.MolFromSmiles.return_value = mock_mol
     mock_rdkit.Chem.MolToMolBlock.return_value = "mock mol block"
-    
+
     return mock_rdkit
 
 

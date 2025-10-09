@@ -61,5 +61,5 @@ def test_success_envelope_shape(route, valid_payload):
     assert isinstance(data["ok"], bool)
     assert isinstance(data["data"], dict)
     assert isinstance(data["errors"], list)
-    assert data["ok"] == True
+    assert data["ok"]
     assert data["errors"] == []

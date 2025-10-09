@@ -13,6 +13,7 @@ from .env import results_base, exports_base
 BASE = Path.cwd() / "IAM_Knowledge"
 RESULTS = BASE / "Results"
 
+
 def get_results_base() -> Path:
     """Get the results base directory from environment or default."""
     # Use the global BASE if it's been modified (for tests), otherwise use env helper
@@ -23,11 +24,13 @@ def get_results_base() -> Path:
     path.mkdir(parents=True, exist_ok=True)
     return path
 
+
 def get_exports_base() -> Path:
     """Get the exports base directory from environment or default."""
     path = exports_base()
     path.mkdir(parents=True, exist_ok=True)
     return path
+
 
 def get_results_dir() -> Path:
     """Get the directory where calc results are stored (directly in base, not a subdirectory)."""
@@ -37,9 +40,11 @@ def get_results_dir() -> Path:
         return RESULTS
     return get_results_base()
 
+
 def get_exports_dir() -> Path:
     """Get the Exports subdirectory."""
     return get_exports_base()
+
 
 def ensure_base() -> Path:
     """Create results and exports directories if missing. Return the results base path."""
@@ -49,6 +54,7 @@ def ensure_base() -> Path:
     exports_dir.mkdir(parents=True, exist_ok=True)
     return get_results_base()
 
+
 def calc_dir(calc_id: str) -> Path:
     """Return Results / calc_id with path traversal protection."""
     # Validate calc_id to prevent path traversal
@@ -56,19 +62,21 @@ def calc_dir(calc_id: str) -> Path:
         raise ValueError(f"Invalid calc_id: {calc_id}")
     if '..' in calc_id or '/' in calc_id or '\\' in calc_id:
         raise ValueError(f"Path traversal attempt in calc_id: {calc_id}")
-    
+
     return get_results_dir() / calc_id
+
 
 def get_results_bulk(calc_ids: List[str]) -> List[Dict[str, Any]]:
     """Return list of {calc_id, data} records for those found; ignore missing."""
     results = []
-    
+
     for calc_id in calc_ids:
         data = get_calc(calc_id)
         if data is not None:
             results.append({"calc_id": calc_id, "data": data})
-    
+
     return results
+
 
 def save_result_json(name: str, payload: dict) -> str:
     """Save a JSON result with timestamp."""
@@ -79,6 +87,7 @@ def save_result_json(name: str, payload: dict) -> str:
     fp.write_text(json.dumps(payload, indent=2))
     return str(fp)
 
+
 def append_benchmark_row(row: dict) -> str:
     """Append a row to the benchmark CSV file."""
     base = get_results_base()
@@ -88,9 +97,11 @@ def append_benchmark_row(row: dict) -> str:
     with fp.open("a", newline="") as f:
         fieldnames = sorted(row.keys())
         w = csv.DictWriter(f, fieldnames=fieldnames)
-        if new: w.writeheader()
+        if new:
+            w.writeheader()
         w.writerow(row)
     return str(fp)
+
 
 def save_calc(calc_id: str, payload: dict) -> Path:
     """Save calculation result by calculation ID."""
@@ -100,29 +111,31 @@ def save_calc(calc_id: str, payload: dict) -> Path:
     result_file.write_text(json.dumps(payload, indent=2))
     return result_file
 
+
 def list_calcs() -> List[str]:
     """Return sorted calc_id list of directories that contain result.json."""
     ensure_base()
     calc_ids = []
-    
+
     results_dir = get_results_dir()
     if not results_dir.exists():
         return calc_ids
-    
+
     for calc_directory in results_dir.iterdir():
         if calc_directory.is_dir():
             result_file = calc_directory / "result.json"
             if result_file.exists():
                 calc_ids.append(calc_directory.name)
-    
+
     return sorted(calc_ids)
+
 
 def get_calc(calc_id: str) -> Optional[Dict[str, Any]]:
     """Get calculation result by calculation ID."""
     try:
         calc_directory = calc_dir(calc_id)
         result_file = calc_directory / "result.json"
-        
+
         if result_file.exists():
             try:
                 return json.loads(result_file.read_text())
@@ -134,13 +147,17 @@ def get_calc(calc_id: str) -> Optional[Dict[str, Any]]:
     return None
 
 # Legacy compatibility wrappers
+
+
 def save_result(calc_id: str, payload: dict) -> Path:
     """Legacy wrapper for save_calc."""
     return save_calc(calc_id, payload)
 
+
 def get_result(calc_id: str) -> Optional[Dict[str, Any]]:
     """Legacy wrapper for get_calc."""
     return get_calc(calc_id)
+
 
 def list_results() -> List[str]:
     """Legacy wrapper for list_calcs."""

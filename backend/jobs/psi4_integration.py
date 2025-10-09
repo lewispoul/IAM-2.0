@@ -145,7 +145,7 @@ class Psi4Calculator:
             opt_xyz = None
         
         # Extract properties
-        wavefunction = psi4.core.get_global_option("WFN")
+        psi4.core.get_global_option("WFN")
         
         results = {
             "energy": float(energy),
@@ -309,7 +309,6 @@ set reference rhf
                         continue
         
         # Look for HOMO/LUMO
-        homo_found = False
         for line in output.split('\n'):
             if 'HOMO' in line and 'LUMO' in line:
                 try:
@@ -319,7 +318,6 @@ set reference rhf
                         results["homo_energy"] = float(parts[2])
                         results["lumo_energy"] = float(parts[5])
                         results["homo_lumo_gap"] = results["lumo_energy"] - results["homo_energy"]
-                        homo_found = True
                 except (ValueError, IndexError):
                     pass
         

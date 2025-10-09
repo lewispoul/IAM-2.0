@@ -70,7 +70,7 @@ async def run_psi4_calculation(
     final_energy = base_energy - energy_variation
     
     # Generate orbital energies (mock HOMO/LUMO)
-    num_orbitals = atom_count * 7  # Rough estimate
+    atom_count * 7  # Rough estimate
     homo_energy = -0.3 - (hash_int % 100) / 1000.0
     lumo_energy = 0.1 + (hash_int % 150) / 1000.0
     

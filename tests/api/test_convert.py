@@ -1,8 +1,11 @@
 from fastapi.testclient import TestClient
 from backend.main import app
+import pytest
 
 client = TestClient(app)
 
+
+@pytest.mark.rdkit
 def test_convert_molfile_good():
     molfile = """
   MJ201100                      
@@ -27,6 +30,7 @@ M  END
     assert data["ok"] is True
     assert "smiles" in data["data"]
     assert "formula" in data["data"]
+
 
 def test_convert_molfile_bad():
     resp = client.post("/convert/molfile", json={"molfile": ""})

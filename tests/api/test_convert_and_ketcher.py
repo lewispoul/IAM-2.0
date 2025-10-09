@@ -1,4 +1,7 @@
 # tests/api/test_convert_and_ketcher.py
+import pytest
+
+pytestmark = pytest.mark.rdkit
 
 MOCK_MOLFILE = """\
 

@@ -3,6 +3,9 @@ FastAPI main application for IAM-2.0 backend.
 Replaces the legacy Flask app from iam.backend.app.
 """
 
+import logging
+import os
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -27,12 +30,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="IAM_GUI/static"), name="static")
+# Mount static files conditionally
+logger = logging.getLogger(__name__)
+static_path = Path(__file__).resolve().parent.parent / "IAM_GUI" / "static"
+if os.getenv("NOX_SKIP_STATIC_MOUNT") == "1":
+    logger.warning(
+        "NOX_SKIP_STATIC_MOUNT=1 → skipping static mount (test env)")
+elif static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+else:
+    logger.warning(
+        f"Static path not found at {static_path}; skipping static mount")
 
 # Include API routers
 app.include_router(convert.router, prefix="/api/convert", tags=["conversion"])
-app.include_router(calc.router, tags=["calculation"])  # calc.router already has prefix="/api/calc"
+# calc.router already has prefix="/api/calc"
+app.include_router(calc.router, tags=["calculation"])
 app.include_router(predict.router, prefix="/api/predict", tags=["prediction"])
 app.include_router(export_router, prefix="/api/export", tags=["export"])
 
@@ -40,6 +53,8 @@ app.include_router(export_router, prefix="/api/export", tags=["export"])
 app.include_router(legacy_router, tags=["legacy"])
 
 # ---- mock target for tests ----
+
+
 def run_calc_task(method: str, payload: dict) -> dict:  # pragma: no cover
     """
     Minimal stub so tests can patch backend.main.run_calc_task.
@@ -48,10 +63,13 @@ def run_calc_task(method: str, payload: dict) -> dict:  # pragma: no cover
     return {"status": "noop", "method": method, "payload": payload}
 
 # Health check endpoints
+
+
 @app.get("/healthz")
 async def health_check():
     """Health check endpoint for monitoring."""
     return {"status": "ok"}
+
 
 @app.get("/api/v1/health")
 async def health_check_legacy():
@@ -59,6 +77,8 @@ async def health_check_legacy():
     return {"status": "ok"}
 
 # Root endpoint
+
+
 @app.get("/")
 async def root():
     """Root endpoint with API information."""
@@ -70,6 +90,8 @@ async def root():
     }
 
 # Ketcher shell endpoint for tests
+
+
 @app.get("/ketcher.html")
 async def ketcher_shell():
     """Serve ketcher shell HTML directly."""
