@@ -3,7 +3,6 @@ import importlib
 import sys
 import subprocess
 import shutil
-from pathlib import Path
 
 # Python packages to check
 pkgs = [
@@ -90,7 +89,7 @@ def main():
     print(f"✅ Platform     : {sys.platform}")
     
     # Check for Ketcher availability (via CDN - always available)
-    print(f"✅ Ketcher      : available (via CDN)")
+    print("✅ Ketcher      : available (via CDN)")
     
     print()
     if all_available:

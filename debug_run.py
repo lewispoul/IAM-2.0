@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import requests
-import json
 from fastapi.testclient import TestClient
 import sys
 sys.path.append('/home/lppoulin/IAM-2.0')

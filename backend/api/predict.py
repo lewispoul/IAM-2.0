@@ -4,10 +4,9 @@ Handles CJ detonation velocity and pressure calculations.
 """
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field, validator
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 import logging
 import hashlib
-import math
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/predict", tags=["prediction"])

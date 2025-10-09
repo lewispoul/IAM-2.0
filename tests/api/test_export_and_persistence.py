@@ -1,6 +1,5 @@
 # tests/api/test_export_and_persistence.py
 import json
-from pathlib import Path
 
 
 def assert_ok(resp):

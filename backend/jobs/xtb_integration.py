@@ -105,8 +105,8 @@ class XTBCalculator:
                 self.xtb_executable,
                 str(xyz_file),
                 f"--{method}",
-                f"--chrg", str(charge),
-                f"--uhf", str(multiplicity - 1),
+                "--chrg", str(charge),
+                "--uhf", str(multiplicity - 1),
                 "--json"  # Request JSON output if supported
             ]
             

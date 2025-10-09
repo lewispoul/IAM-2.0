@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from iam.backend.schemas.common import ok, fail
+from iam.backend.schemas.common import ok
 from pydantic import BaseModel
 
 from iam.runners.cantera_cj import predict_cj

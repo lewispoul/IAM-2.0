@@ -5,7 +5,6 @@ import os
 import zipfile
 import time
 from iam.backend.schemas.common import ok, fail
-from iam.backend.schemas.common import ok, fail
 
 router = APIRouter()
 

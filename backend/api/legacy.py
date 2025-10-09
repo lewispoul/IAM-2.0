@@ -2,24 +2,16 @@
 Legacy compatibility router for IAM2.0.
 Provides Flask-style endpoints expected by existing tests.
 """
-import json
-import os
-import tempfile
-import zipfile
 import hashlib
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
 from fastapi.responses import JSONResponse
 
 from backend.api.envelope import (
-    ok, fail, err, validation_error, not_found_error, 
-    bad_request_error, not_implemented_error, path_traversal_error
+    ok, fail, validation_error, bad_request_error, not_implemented_error
 )
 from backend.converters.rdkit import smiles_to_xyz, molfile_to_xyz
-from backend.jobs.xtb_integration import run_xtb_calculation_enhanced
 from backend.api.calc import XYZRequest, run_xtb, run_psi4
-from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+from backend.utils.persistence import save_result
 
 router = APIRouter()
 
@@ -194,7 +186,7 @@ async def ketcher_to_xyz_legacy(payload: dict = Body(...)):
             # Return error as failure envelope
             return JSONResponse(content=fail([f"Conversion failed: {result.error}"]), status_code=200)
             
-    except Exception as e:
+    except Exception:
         # Fallback to placeholder for any conversion errors
         return JSONResponse(content=ok({
             "xyz": "TODO: 3D coordinates",
@@ -347,7 +339,6 @@ async def compute_empirical_legacy(payload: dict = Body(...)):
 @router.post("/compute/cj")
 async def compute_cj_legacy(payload: dict = Body(...)):
     """Legacy Chapman-Jouguet computation endpoint."""
-    from fastapi import HTTPException
     
     stoich = payload.get("stoich")
     rho0 = payload.get("rho0")

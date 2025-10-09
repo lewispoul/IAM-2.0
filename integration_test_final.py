@@ -5,9 +5,6 @@ This script verifies that the UI integration is working properly.
 """
 
 import requests
-import sys
-import json
-from pathlib import Path
 
 def test_integration():
     """Comprehensive integration test"""
@@ -69,7 +66,7 @@ def test_integration():
         cors_headers = cors_response.headers
         
         if 'Access-Control-Allow-Origin' in cors_headers:
-            print(f"   ✅ CORS headers present")
+            print("   ✅ CORS headers present")
             print(f"   🌍 Allow-Origin: {cors_headers.get('Access-Control-Allow-Origin')}")
             results["cors_enabled"] = True
         else:

@@ -1,5 +1,4 @@
 import requests
-import json
 
 def test_xtb_stub_json():
     """Stubbed /run_xtb returns parseable JSON with expected fields"""

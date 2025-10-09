@@ -9,8 +9,8 @@ import logging
 import asyncio
 from uuid import uuid4
 
-from backend.jobs.xtb_integration import calculator as xtb_calculator, run_xtb_calculation_enhanced, get_xtb_status
-from backend.jobs.psi4_integration import calculator as psi4_calculator, run_psi4_calculation_enhanced, get_psi4_status
+from backend.jobs.xtb_integration import run_xtb_calculation_enhanced, get_xtb_status
+from backend.jobs.psi4_integration import run_psi4_calculation_enhanced, get_psi4_status
 from backend.jobs.empirical_predictor import empirical_predictor
 from ..utils.env import flag
 

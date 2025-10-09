@@ -7,18 +7,16 @@ import os
 import tempfile
 import zipfile
 import hashlib
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Body, HTTPException, BackgroundTasks, Query
+from fastapi import APIRouter, Body, BackgroundTasks, Query
 from fastapi.responses import JSONResponse
 
 from backend.api.envelope import (
-    ok, fail, err, validation_error, not_found_error, 
+    ok, fail, validation_error, not_found_error, 
     bad_request_error, not_implemented_error, path_traversal_error
 )
 from backend.api.convert import SmilesRequest, MolfileRequest, convert_smiles_to_xyz, convert_molfile_to_xyz
 from backend.api.calc import XYZRequest, run_xtb, run_psi4
-from backend.utils.persistence import save_result, get_result, list_results, get_calc, list_calcs
+from backend.utils.persistence import save_result, get_result, list_results
 
 router = APIRouter()
 

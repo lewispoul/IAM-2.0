@@ -4,9 +4,8 @@ Provides deterministic mock results for quantum chemistry calculations.
 """
 import asyncio
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 import hashlib
-import math
 
 logger = logging.getLogger(__name__)
 

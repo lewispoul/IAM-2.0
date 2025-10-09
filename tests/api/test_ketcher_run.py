@@ -1,6 +1,4 @@
 # tests/api/test_ketcher_run.py
-import os
-from pathlib import Path
 from unittest.mock import patch
 
 

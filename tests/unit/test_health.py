@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-import pytest
 from backend.main import app
 
 def test_health():

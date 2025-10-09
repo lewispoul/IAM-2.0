@@ -1,5 +1,4 @@
 # tests/api/test_convert_and_ketcher.py
-from pathlib import Path
 
 MOCK_MOLFILE = """\
 

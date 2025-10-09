@@ -48,7 +48,7 @@ def test_endpoint(endpoint, payload, description):
                     print("   ❌ FAIL: Invalid error envelope")
                     
         except json.JSONDecodeError:
-            print(f"   ❌ FAIL: Invalid JSON response")
+            print("   ❌ FAIL: Invalid JSON response")
             print(f"   Raw response: {response.text[:200]}...")
             
     except requests.exceptions.RequestException as e:
@@ -172,4 +172,4 @@ if __name__ == "__main__":
     except requests.exceptions.RequestException as e:
         print(f"❌ Cannot connect to backend at {API_BASE}")
         print(f"   Error: {e}")
-        print(f"   💡 Start backend with: uvicorn iam.backend.app:app --reload --port 8010")
+        print("   💡 Start backend with: uvicorn iam.backend.app:app --reload --port 8010")

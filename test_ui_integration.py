@@ -11,7 +11,6 @@ It can work in two modes:
 Run this to verify the integration is working as expected.
 """
 
-import webbrowser
 import os
 import time
 from pathlib import Path

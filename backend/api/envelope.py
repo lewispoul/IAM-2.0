@@ -3,8 +3,7 @@ Response envelope helpers for IAM2.0 API compatibility.
 Provides standardized success/error response formats expected by tests.
 """
 import uuid
-from typing import Any, Dict, List, Optional, Union
-from fastapi import HTTPException
+from typing import Any, Dict, List, Optional
 from fastapi.responses import JSONResponse
 
 

@@ -1,7 +1,6 @@
 """
 Test that the example HTTP requests work correctly
 """
-import pytest
 from fastapi.testclient import TestClient
 from backend.main import app
 

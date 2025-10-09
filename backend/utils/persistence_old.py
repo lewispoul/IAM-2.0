@@ -1,5 +1,7 @@
 from pathlib import Path
-import json, csv, time
+import json
+import csv
+import time
 import os
 import re
 from typing import Dict, List, Optional, Any
@@ -7,13 +9,6 @@ from typing import Dict, List, Optional, Any
 # Honor the IAM_RESULTS_BASE environment variable used by tests
 """Persistence layer for IAM-2.0."""
 
-import json
-import csv
-import time
-import re
-import os
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 
 # Dynamic path resolution to respect environment changes
 def get_results_base() -> Path:

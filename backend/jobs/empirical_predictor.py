@@ -2,11 +2,9 @@
 Empirical Predictor for IAM-2.0
 Implements ML-based property prediction and empirical analysis
 """
-import json
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 from pathlib import Path
-import tempfile
 import os
 import time
 

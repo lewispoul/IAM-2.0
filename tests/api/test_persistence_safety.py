@@ -1,7 +1,6 @@
 """
 Tests for persistence hooks and /export/zip safety
 """
-import pytest
 import tempfile
 import os
 import json

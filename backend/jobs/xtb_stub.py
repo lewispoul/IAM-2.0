@@ -4,7 +4,7 @@ Provides deterministic mock results for development and testing.
 """
 import asyncio
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import hashlib
 
 logger = logging.getLogger(__name__)
